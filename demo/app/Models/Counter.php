@@ -11,9 +11,9 @@ class Counter extends Model
 
     protected $table = 'counters';
 
-    // Par défaut Laravel s'attend à un champ 'id' auto-incrémenté
-    // Le champ 'count' est un integer dans ta migration
-
+    /**
+     * Les attributs que l’on peut assigner en masse.
+     */
     protected $fillable = [
         'count',
     ];

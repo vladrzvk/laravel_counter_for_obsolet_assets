@@ -3,24 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Models\Counter;
+use Illuminate\Http\Request;
 
 class CounterController extends Controller
 {
-    public function incrementCount()
+    public function index()
     {
-        // Récupère le premier enregistrement (ou crée-le s'il n'existe pas)
+        // On récupère le premier enregistrement ou on le crée
         $counter = Counter::first();
         if (!$counter) {
             $counter = Counter::create(['count' => 0]);
         }
 
-        // Incrémente le champ count
+        // On retourne une vue avec la valeur du compteur
+        return view('counter.index', [
+            'count' => $counter->count,
+        ]);
+    }
+
+    public function click(Request $request)
+    {
+        // Récupère le premier enregistrement
+        $counter = Counter::first();
+        if (!$counter) {
+            $counter = Counter::create(['count' => 0]);
+        }
+
+        // Incrémente
         $counter->count = $counter->count + 1;
         $counter->save();
 
-        return response()->json([
-            'message' => 'Click enregistré',
-            'count'   => $counter->count,
-        ], 200);
+        // Redirige vers la page d’accueil
+        return redirect('/');
     }
 }
