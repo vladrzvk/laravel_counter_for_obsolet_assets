@@ -7,33 +7,45 @@ use Illuminate\Http\Request;
 
 class CounterController extends Controller
 {
-    public function index()
+    /**
+     * Affiche la page HTML (UI) : /home
+     */
+    public function home()
     {
-        // On récupère le premier enregistrement ou on le crée
+        return view('counter.index');
+    }
+
+    /**
+     * Renvoie la valeur actuelle du compteur (API GET /api/click).
+     */
+    public function getCount()
+    {
         $counter = Counter::first();
         if (!$counter) {
             $counter = Counter::create(['count' => 0]);
         }
 
-        // On retourne une vue avec la valeur du compteur
-        return view('counter.index', [
+        return response()->json([
             'count' => $counter->count,
         ]);
     }
 
-    public function click(Request $request)
+    /**
+     * Incrémente la valeur du compteur (API POST /api/click).
+     */
+    public function incrementCount(Request $request)
     {
-        // Récupère le premier enregistrement
         $counter = Counter::first();
         if (!$counter) {
             $counter = Counter::create(['count' => 0]);
         }
 
-        // Incrémente
-        $counter->count = $counter->count + 1;
+        $counter->count += 1;
         $counter->save();
 
-        // Redirige vers la page d’accueil
-        return redirect('/');
+        return response()->json([
+            'message' => 'Compteur incrémenté',
+            'count'   => $counter->count,
+        ]);
     }
 }

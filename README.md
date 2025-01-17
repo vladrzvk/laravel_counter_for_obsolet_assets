@@ -116,3 +116,15 @@ Tous les services sont accessibles via Traefik sur le port 8081 :
 3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
 4. Push vers la branche (`git push origin feature/AmazingFeature`)
 5. Ouvrez une Pull Request
+
+
+
+## ajouter les differents forwarding dans le fichier hosts 
+
+sous windows C:\Windows\System32\drivers\etc\
+
+127.0.0.1  laravel.localhost
+127.0.0.1  traefik.localhost
+127.0.0.1  pma.localhost
+127.0.0.1  grafana.localhost
+...
