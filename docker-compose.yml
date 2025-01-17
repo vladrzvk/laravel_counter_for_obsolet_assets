@@ -155,6 +155,7 @@ services:
     image: grafana/loki:latest
     volumes:
       - ./monitoring/loki:/etc/loki
+      - ./monitoring/loki_data:/tmp/loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - laravel
