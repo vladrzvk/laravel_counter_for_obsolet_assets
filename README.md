@@ -212,3 +212,20 @@ docker-compose logs [service]
 - Authentification sécurisée pour tous les services
 - Isolation des réseaux Docker
 - Variables d'environnement pour les données sensibles
+
+### Gestion des secrets
+1. Le fichier `.env.example` fournit un modèle des variables nécessaires, mais ne contient PAS de vrais mots de passe
+2. Lors de l'installation :
+   ```bash
+   # Copier le modèle
+   cp .env.example .env
+   
+   # Éditer le fichier avec vos propres mots de passe sécurisés
+   # IMPORTANT : Ne jamais commiter le fichier .env
+   nano .env
+   ```
+3. Bonnes pratiques :
+   - Utilisez des mots de passe forts et uniques pour chaque service
+   - Ne partagez jamais le fichier `.env` contenant vos vrais mots de passe
+   - Le fichier `.env` est déjà dans le `.gitignore` pour éviter les commits accidentels
+   - Pour le partage en équipe, utilisez un gestionnaire de secrets sécurisé
