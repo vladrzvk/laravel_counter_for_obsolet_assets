@@ -88,6 +88,18 @@ Le projet utilise une application Laravel conteneurisée avec une stack de monit
 - `prometheus_data` : Données Prometheus
 - `grafana_data` : Données Grafana
 
+## Prérequis
+- Docker Desktop installé et en cours d'exécution
+- Git installé pour cloner le projet
+
+Note : Vous n'avez pas besoin d'installer PHP, Composer ou MySQL sur votre machine locale. Tout est géré dans les conteneurs Docker.
+
+### Ports requis disponibles :
+- 8081 (Traefik)
+- 8080 (Dashboard Traefik)
+- 8000 (Application Laravel)
+- 33060 (MySQL)
+
 ## Installation et Démarrage
 
 1. Cloner le repository :
@@ -102,12 +114,56 @@ cp .env.example .env
 # Éditer le fichier .env avec les identifiants appropriés
 ```
 
-3. Démarrer les services :
+3. Créer les dossiers nécessaires pour le monitoring :
 ```bash
-docker-compose up -d
+mkdir -p monitoring/prometheus monitoring/alertmanager
 ```
 
-4. Accéder à l'application via : `http://laravel.localhost`
+4. S'assurer que les fichiers de configuration sont présents :
+- `monitoring/prometheus/prometheus.yml`
+- `monitoring/alertmanager/alertmanager.yml`
+
+5. Démarrer les services :
+```bash
+# Arrêter les conteneurs existants si nécessaire
+docker-compose down
+
+# Supprimer les volumes si vous voulez repartir de zéro
+docker-compose down -v
+
+# Démarrer tous les services
+docker-compose up -d
+
+# Vérifier les logs de l'application
+docker-compose logs -f app
+```
+
+6. Vérifier que tous les services sont en cours d'exécution :
+```bash
+docker-compose ps
+```
+
+7. Accéder à l'application :
+- Application Laravel : `http://laravel.localhost:8081`
+- Les autres services sont accessibles aux URLs mentionnées dans la section "URLs d'Accès"
+
+## Résolution des problèmes courants
+
+### Erreur de dépendances PHP
+Si vous voyez une erreur concernant `vendor/autoload.php`, les dépendances Composer ne sont pas installées. Solution :
+```bash
+# Redémarrer les conteneurs
+docker-compose down && docker-compose up -d
+```
+
+### Erreur de connexion à la base de données
+Vérifier que :
+1. Le service MySQL est bien démarré
+2. Les variables d'environnement dans le fichier `.env` sont correctes
+3. Les migrations ont bien été exécutées
+
+### Problèmes de ports
+Si certains ports sont déjà utilisés, vous pouvez les modifier dans le `docker-compose.yml`
 
 ## Monitoring
 
