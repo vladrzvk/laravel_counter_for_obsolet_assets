@@ -16,7 +16,7 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'node-exporter'
+  - job_name: 'node'
     static_configs:
       - targets: ['node-exporter:9100']
 
@@ -24,7 +24,6 @@ scrape_configs:
     static_configs:
       - targets: ['cadvisor:8080']
 
-  - job_name: 'laravel'
-    metrics_path: '/metrics'
+  - job_name: 'loki'
     static_configs:
-      - targets: ['app:8000'] 
+      - targets: ['loki:3100'] 

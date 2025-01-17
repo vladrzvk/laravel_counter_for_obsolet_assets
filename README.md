@@ -64,6 +64,27 @@ Trois dashboards sont préconfigurés :
    - Utilisation mémoire par conteneur
    - Performance des conteneurs
 
+## Système d'Alertes
+
+Le projet inclut un système d'alertes complet basé sur Prometheus et AlertManager.
+
+### Alertes configurées
+
+1. **Ressources Système** :
+   - CPU > 80% pendant 5 minutes
+   - Mémoire > 80% pendant 5 minutes
+
+2. **Conteneurs** :
+   - CPU conteneur > 80% pendant 5 minutes
+   - Mémoire conteneur > 80% pendant 5 minutes
+
+### Configuration des alertes
+
+- Groupement par nom d'alerte
+- Délai d'attente : 10 secondes
+- Intervalle de répétition : 1 heure
+- Inhibition des alertes redondantes
+
 ## Gestion des secrets
 
 1. Le fichier `.env.example` sert de modèle et ne contient pas de mots de passe réels
