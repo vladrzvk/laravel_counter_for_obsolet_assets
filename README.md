@@ -7,6 +7,74 @@ Application de gestion et de suivi des actifs obsolètes développée avec Larav
 - Docker et Docker Compose
 - Git
 
+## Description des Services
+
+### Services Principaux
+
+- **Laravel (app)** : 
+  - Framework PHP pour le développement de l'application web
+  - Gère la logique métier et les interfaces utilisateur
+  - Expose l'application sur http://laravel.localhost
+
+- **MySQL (db)** : 
+  - Système de gestion de base de données relationnelle
+  - Stocke toutes les données de l'application
+  - Optimisé pour les performances avec des volumes persistants
+
+- **phpMyAdmin** : 
+  - Interface web d'administration pour MySQL
+  - Permet de gérer la base de données visuellement
+  - Accessible sur http://pma.localhost
+
+- **Traefik** : 
+  - Reverse proxy moderne et load balancer
+  - Gère le routage des requêtes vers les différents services
+  - Fournit des URLs propres pour chaque service
+  - Dashboard disponible sur http://traefik.localhost
+
+### Stack de Monitoring
+
+- **Prometheus** : 
+  - Système de collecte et stockage de métriques
+  - Récupère les données de performance de tous les services
+  - Permet la définition de règles d'alertes
+  - Interface disponible sur http://prometheus.localhost
+
+- **Grafana** : 
+  - Plateforme de visualisation et d'analyse
+  - Crée des dashboards interactifs
+  - Affiche les métriques de Prometheus et les logs de Loki
+  - Interface sur http://grafana.localhost (login: admin/admin)
+
+- **Loki** : 
+  - Système d'agrégation de logs inspiré de Prometheus
+  - Stocke et indexe les logs de tous les conteneurs
+  - Permet des requêtes et des recherches efficaces
+  - API accessible sur http://loki.localhost
+
+- **Promtail** : 
+  - Agent de collecte de logs pour Loki
+  - Récupère les logs des conteneurs Docker
+  - Ajoute des labels et des métadonnées aux logs
+  - Interface de statut sur http://promtail.localhost
+
+- **cAdvisor** : 
+  - Analyse les performances des conteneurs
+  - Fournit des métriques sur l'utilisation des ressources
+  - Historique d'utilisation CPU, mémoire, réseau
+  - Interface sur http://cadvisor.localhost
+
+- **Node Exporter** : 
+  - Exporte les métriques du système hôte
+  - Collecte les données CPU, mémoire, disque, réseau
+  - Fournit des métriques au format Prometheus
+
+- **AlertManager** : 
+  - Gère les notifications et les alertes
+  - Regroupe et route les alertes
+  - Gère les silences et les inhibitions
+  - Interface sur http://alertmanager.localhost
+
 ## Installation
 
 1. Clonez le dépôt :
@@ -30,20 +98,20 @@ docker-compose up -d
 
 Le projet utilise une architecture moderne basée sur Docker avec les services suivants :
 
-- **Laravel** : Application PHP (http://laravel.localhost:8081)
+- **Laravel** : Application PHP (http://laravel.localhost)
 - **MySQL** : Base de données
-- **phpMyAdmin** : Interface d'administration MySQL (http://pma.localhost:8081)
-- **Traefik** : Reverse proxy et load balancer (http://traefik.localhost:8081)
+- **phpMyAdmin** : Interface d'administration MySQL (http://pma.localhost)
+- **Traefik** : Reverse proxy et load balancer (http://traefik.localhost)
 
 ### Stack de Monitoring
 
-- **Prometheus** : Collecte de métriques (http://prometheus.localhost:8081)
-- **Grafana** : Visualisation des métriques et logs (http://grafana.localhost:8081)
-- **Loki** : Agrégation de logs
-- **Promtail** : Collecteur de logs
-- **cAdvisor** : Métriques des conteneurs (http://cadvisor.localhost:8081)
+- **Prometheus** : Collecte de métriques (http://prometheus.localhost)
+- **Grafana** : Visualisation des métriques et logs (http://grafana.localhost)
+- **Loki** : Agrégation de logs (http://loki.localhost)
+- **Promtail** : Collecteur de logs (http://promtail.localhost)
+- **cAdvisor** : Métriques des conteneurs (http://cadvisor.localhost)
 - **Node Exporter** : Métriques système
-- **AlertManager** : Gestion des alertes (http://alertmanager.localhost:8081)
+- **AlertManager** : Gestion des alertes (http://alertmanager.localhost)
 
 ## Dashboards Grafana
 
@@ -99,15 +167,35 @@ Le projet inclut un système d'alertes complet basé sur Prometheus et AlertMana
 
 ## Accès aux services
 
-Tous les services sont accessibles via Traefik sur le port 8081 :
+Tous les services sont accessibles via Traefik :
 
-- Application : http://laravel.localhost:8081
-- Grafana : http://grafana.localhost:8081
-- phpMyAdmin : http://pma.localhost:8081
-- Traefik Dashboard : http://traefik.localhost:8081
-- Prometheus : http://prometheus.localhost:8081
-- AlertManager : http://alertmanager.localhost:8081
-- cAdvisor : http://cadvisor.localhost:8081
+- Application : http://laravel.localhost
+- Grafana : http://grafana.localhost (login: admin/admin)
+- phpMyAdmin : http://pma.localhost
+- Traefik Dashboard : http://traefik.localhost
+- Prometheus : http://prometheus.localhost
+- AlertManager : http://alertmanager.localhost
+- cAdvisor : http://cadvisor.localhost
+- Loki : http://loki.localhost
+- Promtail : http://promtail.localhost
+
+## Configuration du fichier hosts
+
+Ajoutez les entrées suivantes dans votre fichier hosts :
+- Windows : `C:\Windows\System32\drivers\etc\hosts`
+- Linux/Mac : `/etc/hosts`
+
+```
+127.0.0.1  laravel.localhost
+127.0.0.1  traefik.localhost
+127.0.0.1  pma.localhost
+127.0.0.1  grafana.localhost
+127.0.0.1  prometheus.localhost
+127.0.0.1  alertmanager.localhost
+127.0.0.1  cadvisor.localhost
+127.0.0.1  loki.localhost
+127.0.0.1  promtail.localhost
+```
 
 ## Contribution
 
@@ -116,15 +204,3 @@ Tous les services sont accessibles via Traefik sur le port 8081 :
 3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
 4. Push vers la branche (`git push origin feature/AmazingFeature`)
 5. Ouvrez une Pull Request
-
-
-
-## ajouter les differents forwarding dans le fichier hosts 
-
-sous windows C:\Windows\System32\drivers\etc\
-
-127.0.0.1  laravel.localhost
-127.0.0.1  traefik.localhost
-127.0.0.1  pma.localhost
-127.0.0.1  grafana.localhost
-...
