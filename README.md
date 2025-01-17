@@ -60,7 +60,14 @@ Le projet utilise une application Laravel conteneurisée avec une stack de monit
 
 ### Monitoring
 - Grafana : `http://grafana.localhost:8081`
-  - Identifiants : Voir fichier .env ou contacter l'administrateur
+  - Identifiants par défaut :
+    - Utilisateur : `admin`
+    - Mot de passe : `admin`
+  - Ces identifiants peuvent être modifiés dans le fichier `.env` :
+    ```env
+    GRAFANA_ADMIN_USER=votre_utilisateur
+    GRAFANA_ADMIN_PASSWORD=votre_mot_de_passe
+    ```
 - Prometheus : `http://prometheus.localhost:8081`
 - AlertManager : `http://alertmanager.localhost:8081`
 - cAdvisor : `http://cadvisor.localhost:8081`
