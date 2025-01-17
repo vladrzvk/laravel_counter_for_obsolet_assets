@@ -155,13 +155,14 @@ services:
     image: grafana/loki:2.4.2
     volumes:
       - ./monitoring/loki:/etc/loki
-      - ./monitoring/loki_data:/tmp/loki
+      - loki_data:/tmp/loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - laravel
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.loki.rule=Host(`loki.localhost`)"
+      - "traefik.http.routers.loki.entrypoints=web"
       - "traefik.http.services.loki.loadbalancer.server.port=3100"
 
   promtail:
@@ -187,3 +188,5 @@ volumes:
     driver: local
   grafana_data:
     driver: local 
+  loki_data:
+    driver: local
