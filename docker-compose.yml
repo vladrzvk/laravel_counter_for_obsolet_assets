@@ -8,7 +8,7 @@ services:
       - "--entrypoints.web.address=:80"
       - "--api.dashboard=true"
     ports:
-      - "80:80"
+      - "8081:80"
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -32,10 +32,10 @@ services:
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
-      - APP_KEY=${APP_KEY}
+    ports:
+      - "8000:8000"
     command: >
       bash -c "composer install &&
-              php artisan key:generate --force || true &&
               php artisan migrate --force || true &&
               php artisan serve --host=0.0.0.0 --port=8000"
     depends_on:
@@ -50,15 +50,15 @@ services:
 
   db:
     image: mysql:8.0
+    ports:
+      - "33060:3306"
     environment:
       - MYSQL_DATABASE=${DB_DATABASE}
       - MYSQL_USER=${DB_USERNAME}
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     volumes:
-      - type: volume
-        source: mysql_data
-        target: /var/lib/mysql
+      - mysql_data:/var/lib/mysql
     networks:
       - laravel
 
@@ -79,9 +79,7 @@ services:
     image: prom/prometheus:latest
     volumes:
       - ./monitoring/prometheus:/etc/prometheus
-      - type: volume
-        source: prometheus_data
-        target: /prometheus
+      - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -97,9 +95,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     volumes:
-      - type: volume
-        source: grafana_data
-        target: /var/lib/grafana
+      - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
       - ./monitoring/grafana/dashboards:/etc/grafana/dashboards
     environment:
@@ -146,9 +142,6 @@ services:
     image: prom/alertmanager:latest
     volumes:
       - ./monitoring/alertmanager:/etc/alertmanager
-      - type: volume
-        source: alertmanager_data
-        target: /alertmanager
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
       - '--storage.path=/alertmanager'
@@ -161,51 +154,40 @@ services:
 
   loki:
     image: grafana/loki:2.4.2
-    user: "root"
     volumes:
       - ./monitoring/loki:/etc/loki
-      - type: volume
-        source: loki_data
-        target: /loki
+      - loki_data:/tmp/loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - laravel
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.loki.rule=Host(`loki.localhost`)"
+      - "traefik.http.routers.loki.entrypoints=web"
       - "traefik.http.services.loki.loadbalancer.server.port=3100"
 
   promtail:
     image: grafana/promtail:latest
-    user: root
     volumes:
       - ./monitoring/promtail:/etc/promtail
       - /var/log:/var/log
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     command: -config.file=/etc/promtail/config.yml
     networks:
       - laravel
     depends_on:
       - loki
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.promtail.rule=Host(`promtail.localhost`)"
-      - "traefik.http.services.promtail.loadbalancer.server.port=9080"
 
 networks:
   laravel:
-    name: laravel_network
     driver: bridge
 
 volumes:
   mysql_data:
-    name: laravel_mysql_data
+    driver: local
   prometheus_data:
-    name: laravel_prometheus_data
+    driver: local
   grafana_data:
-    name: laravel_grafana_data
+    driver: local 
   loki_data:
-    name: laravel_loki_data
-  alertmanager_data:
-    name: laravel_alertmanager_data
+    driver: local
