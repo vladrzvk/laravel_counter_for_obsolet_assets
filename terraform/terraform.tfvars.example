@@ -1,0 +1,10 @@
+# Variables pour Azure
+location = "francecentral"  # Region Azure à utiliser
+prefix   = "your-prefix"    # Préfixe pour nommer les ressources
+
+# Variables pour MySQL
+mysql_admin_username = "admin_username"  # Nom d'utilisateur admin MySQL
+mysql_admin_password = "your_password"   # Mot de passe admin MySQL (à changer !)
+
+# Variables pour GitHub
+github_repo_url = "https://github.com/your-username/your-repo.git"  # URL du dépôt GitHub 

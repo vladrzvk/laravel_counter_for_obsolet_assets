@@ -16,3 +16,11 @@ yarn-error.log
 /.vscode
 .DS_Store
 ./monitoring/loki_data
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfvars
+terraform/*.tfvars.json
+terraform/plan*
