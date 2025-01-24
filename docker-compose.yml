@@ -8,7 +8,7 @@ services:
       - "--entrypoints.web.address=:80"
       - "--api.dashboard=true"
     ports:
-      - "8081:80"
+      - "80:80"
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -26,39 +26,51 @@ services:
       - ./demo:/var/www/html
     working_dir: /var/www/html
     environment:
+      - APP_NAME=Laravel
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_URL=http://laravel.localhost
       - DB_CONNECTION=${DB_CONNECTION}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
-    ports:
-      - "8000:8000"
+      - APP_KEY=${APP_KEY}
+      - LOG_CHANNEL=stack
+      - LOG_LEVEL=debug
+      - BROADCAST_DRIVER=log
+      - CACHE_DRIVER=file
+      - QUEUE_CONNECTION=sync
+      - SESSION_DRIVER=file
+      - SESSION_LIFETIME=120
     command: >
       bash -c "composer install &&
+              php artisan key:generate --force || true &&
               php artisan migrate --force || true &&
               php artisan serve --host=0.0.0.0 --port=8000"
     depends_on:
-      - db
+      db:
+        condition: service_started
     networks:
       - laravel
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.laravel.rule=Host(`laravel.localhost`)"
+      - "traefik.http.routers.laravel.rule=Host(`laravel.localhost`) || Host(`localhost`)"
       - "traefik.http.routers.laravel.entrypoints=web"
       - "traefik.http.services.laravel.loadbalancer.server.port=8000"
 
   db:
     image: mysql:8.0
-    ports:
-      - "33060:3306"
     environment:
       - MYSQL_DATABASE=${DB_DATABASE}
       - MYSQL_USER=${DB_USERNAME}
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     volumes:
-      - mysql_data:/var/lib/mysql
+      - type: volume
+        source: mysql_data
+        target: /var/lib/mysql
     networks:
       - laravel
 
@@ -79,7 +91,9 @@ services:
     image: prom/prometheus:latest
     volumes:
       - ./monitoring/prometheus:/etc/prometheus
-      - prometheus_data:/prometheus
+      - type: volume
+        source: prometheus_data
+        target: /prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -95,7 +109,9 @@ services:
   grafana:
     image: grafana/grafana:latest
     volumes:
-      - grafana_data:/var/lib/grafana
+      - type: volume
+        source: grafana_data
+        target: /var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
       - ./monitoring/grafana/dashboards:/etc/grafana/dashboards
     environment:
@@ -142,6 +158,9 @@ services:
     image: prom/alertmanager:latest
     volumes:
       - ./monitoring/alertmanager:/etc/alertmanager
+      - type: volume
+        source: alertmanager_data
+        target: /alertmanager
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
       - '--storage.path=/alertmanager'
@@ -154,40 +173,51 @@ services:
 
   loki:
     image: grafana/loki:2.4.2
+    user: "root"
     volumes:
       - ./monitoring/loki:/etc/loki
-      - loki_data:/tmp/loki
+      - type: volume
+        source: loki_data
+        target: /loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - laravel
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.loki.rule=Host(`loki.localhost`)"
-      - "traefik.http.routers.loki.entrypoints=web"
       - "traefik.http.services.loki.loadbalancer.server.port=3100"
 
   promtail:
     image: grafana/promtail:latest
+    user: root
     volumes:
       - ./monitoring/promtail:/etc/promtail
       - /var/log:/var/log
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     command: -config.file=/etc/promtail/config.yml
     networks:
       - laravel
     depends_on:
       - loki
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.promtail.rule=Host(`promtail.localhost`)"
+      - "traefik.http.services.promtail.loadbalancer.server.port=9080"
 
 networks:
   laravel:
+    name: laravel_network
     driver: bridge
 
 volumes:
   mysql_data:
-    driver: local
+    name: laravel_mysql_data
   prometheus_data:
-    driver: local
+    name: laravel_prometheus_data
   grafana_data:
-    driver: local 
+    name: laravel_grafana_data
   loki_data:
-    driver: local
+    name: laravel_loki_data
+  alertmanager_data:
+    name: laravel_alertmanager_data
