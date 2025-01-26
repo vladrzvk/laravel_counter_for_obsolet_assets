@@ -18,9 +18,16 @@ yarn-error.log
 ./monitoring/loki_data
 
 # Terraform
-terraform/.terraform/
-terraform/*.tfstate
-terraform/*.tfstate.*
-terraform/*.tfvars
-terraform/*.tfvars.json
-terraform/plan*
+terraform/*/.terraform/
+terraform/*/*.tfstate
+terraform/*/*.tfstate.*
+terraform/*/*.tfvars
+terraform/*/*.tfvars.json
+terraform/*/plan*
+
+# iaas
+terraform/iaas/ssh/*
+terraform/iaas/*.txt
+terraform/iaas/ansible/inventories/group_vars/all.yml
+terraform/iaas/.terraform.*.*
+

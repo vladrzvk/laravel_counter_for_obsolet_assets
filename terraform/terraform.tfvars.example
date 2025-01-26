@@ -16,4 +16,4 @@ app_debug = "false"                       # Désactivé en production pour la s�
 app_key = "your-base64-encoded-key"       # Clé de chiffrement Laravel (à générer avec php artisan key:generate)
 
 # Variables pour la base de données
-db_database = "your_database_name"        # Nom de votre base de données MySQL 
+db_database = "your_database_name"       # Nom de votre base de données MySQL 

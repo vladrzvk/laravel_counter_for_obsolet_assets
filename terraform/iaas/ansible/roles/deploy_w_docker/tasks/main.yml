@@ -1,0 +1,111 @@
+---
+# tasks file for deploy_w_docker
+- name: Supprimer complètement le répertoire existant
+  file:
+    path: /var/www/sample-app
+    state: absent
+  become: true
+
+- name: Recreate /var/www/sample-app directory
+  file:
+    path: /var/www/sample-app
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+    recurse: true
+
+- name: Rends /var/www/sample-app comme 'safe' Git repository
+  command: git config --global --add safe.directory /var/www/sample-app
+  become: true
+
+- name: Cloner le dépôt Laravel
+  git:
+    repo: https://github.com/vladrzvk/laravel_counter_for_obsolet_assets.git
+    dest: /var/www/sample-app
+    version: implementation_playbooks
+    force: yes
+  become: true
+
+- name: Accorde les droits necessaire pour sample-app
+  file:
+    path: /var/www/sample-app
+    owner: www-data
+    group: www-data
+    recurse: true
+
+- name: Accorde les droits necessaires sur les fichiers
+  file:
+    path: "{{ item }}"
+    mode: '0775'
+    recurse: true
+  loop:
+    - /var/www/sample-app/storage
+    - /var/www/sample-app/bootstrap/cache
+
+- name: Check s'il y a des conteneurs en cours
+  shell: docker ps -q
+  register: running_containers
+  changed_when: false
+
+- name: Stop tous les conteneurs en cours
+  shell: docker stop $(docker ps -q)
+  when: running_containers.stdout != ""
+  ignore_errors: true
+
+- name: Check les conteneurs en cours
+  shell: docker ps -aq
+  register: all_containers
+  changed_when: false
+
+- name: Supprime tous les conteneurs
+  shell: docker rm $(docker ps -aq)
+  when: all_containers.stdout != ""
+  ignore_errors: true
+
+- name: Run Docker Compose for sample-app
+  command: docker-compose up -d
+  args:
+    chdir: /var/www/sample-app
+
+
+- name: Patiente pendant 20 secondes
+  ansible.builtin.pause:
+    seconds: 20
+  become: true
+
+
+# Vérifier si les migrations existent
+- name: Vérifier si des migrations existent
+  command: docker exec sample-app_app_1 php artisan migrate:status
+  register: migrations_status
+  ignore_errors: true
+  become: true
+
+# Créer une migration si aucune migration n'existe
+- name: Créer une migration si nécessaire
+  command: docker exec sample-app_app_1 php artisan make:migration init_migration
+  when: migrations_status.rc != 0
+  become: true
+
+# Exécuter les migrations
+- name: Exécuter les migrations Laravel
+  command: docker exec sample-app_app_1 php artisan migrate --force
+  register: migration_output
+  become: true
+
+# Afficher le résultat des migrations
+- name: Afficher le résultat des migrations
+  debug:
+    var: migration_output.stdout
+
+# Exécuter le seeding de la base de données
+- name: Remplir la base de données avec des données de seeders
+  command: docker exec sample-app_app_1 php artisan db:seed --force
+  register: seed_output
+  become: true
+
+# Afficher le résultat du seeding
+- name: Afficher le résultat du seeding
+  debug:
+    var: seed_output.stdout
