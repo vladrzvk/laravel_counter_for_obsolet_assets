@@ -74,136 +74,136 @@ services:
     networks:
       - laravel
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    environment:
-      - PMA_HOST=db
-      - PMA_USER=${DB_USERNAME}
-      - PMA_PASSWORD=${DB_PASSWORD}
-    networks:
-      - laravel
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.phpmyadmin.rule=Host(`pma.localhost`)"
-      - "traefik.http.services.phpmyadmin.loadbalancer.server.port=80"
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin
+  #   environment:
+  #     - PMA_HOST=db
+  #     - PMA_USER=${DB_USERNAME}
+  #     - PMA_PASSWORD=${DB_PASSWORD}
+  #   networks:
+  #     - laravel
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.phpmyadmin.rule=Host(`pma.localhost`)"
+  #     - "traefik.http.services.phpmyadmin.loadbalancer.server.port=80"
 
-  prometheus:
-    image: prom/prometheus:latest
-    volumes:
-      - ./monitoring/prometheus:/etc/prometheus
-      - type: volume
-        source: prometheus_data
-        target: /prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-    networks:
-      - laravel
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.prometheus.rule=Host(`prometheus.localhost`)"
-      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   volumes:
+  #     - ./monitoring/prometheus:/etc/prometheus
+  #     - type: volume
+  #       source: prometheus_data
+  #       target: /prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+  #     - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+  #     - '--web.console.templates=/usr/share/prometheus/consoles'
+  #   networks:
+  #     - laravel
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.prometheus.rule=Host(`prometheus.localhost`)"
+  #     - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
 
-  grafana:
-    image: grafana/grafana:latest
-    volumes:
-      - type: volume
-        source: grafana_data
-        target: /var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
-      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
-    networks:
-      - laravel
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.grafana.rule=Host(`grafana.localhost`)"
-      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   volumes:
+  #     - type: volume
+  #       source: grafana_data
+  #       target: /var/lib/grafana
+  #     - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+  #     - ./monitoring/grafana/dashboards:/etc/grafana/dashboards
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+  #     - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+  #     - GF_USERS_ALLOW_SIGN_UP=false
+  #     - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+  #   networks:
+  #     - laravel
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.grafana.rule=Host(`grafana.localhost`)"
+  #     - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    networks:
-      - laravel
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.localhost`)"
-      - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor:latest
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:ro
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #     - /dev/disk/:/dev/disk:ro
+  #   networks:
+  #     - laravel
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.localhost`)"
+  #     - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
 
-  node-exporter:
-    image: prom/node-exporter:latest
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    networks:
-      - laravel
+  # node-exporter:
+  #   image: prom/node-exporter:latest
+  #   volumes:
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /:/rootfs:ro
+  #   command:
+  #     - '--path.procfs=/host/proc'
+  #     - '--path.sysfs=/host/sys'
+  #     - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+  #   networks:
+  #     - laravel
 
-  alertmanager:
-    image: prom/alertmanager:latest
-    volumes:
-      - ./monitoring/alertmanager:/etc/alertmanager
-      - type: volume
-        source: alertmanager_data
-        target: /alertmanager
-    command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
-      - '--storage.path=/alertmanager'
-    networks:
-      - laravel
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.localhost`)"
-      - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
+  # alertmanager:
+  #   image: prom/alertmanager:latest
+  #   volumes:
+  #     - ./monitoring/alertmanager:/etc/alertmanager
+  #     - type: volume
+  #       source: alertmanager_data
+  #       target: /alertmanager
+  #   command:
+  #     - '--config.file=/etc/alertmanager/alertmanager.yml'
+  #     - '--storage.path=/alertmanager'
+  #   networks:
+  #     - laravel
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.localhost`)"
+  #     - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
 
-  loki:
-    image: grafana/loki:2.4.2
-    user: "root"
-    volumes:
-      - ./monitoring/loki:/etc/loki
-      - type: volume
-        source: loki_data
-        target: /loki
-    command: -config.file=/etc/loki/local-config.yaml
-    networks:
-      - laravel
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.loki.rule=Host(`loki.localhost`)"
-      - "traefik.http.services.loki.loadbalancer.server.port=3100"
+  # loki:
+  #   image: grafana/loki:2.4.2
+  #   user: "root"
+  #   volumes:
+  #     - ./monitoring/loki:/etc/loki
+  #     - type: volume
+  #       source: loki_data
+  #       target: /loki
+  #   command: -config.file=/etc/loki/local-config.yaml
+  #   networks:
+  #     - laravel
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.loki.rule=Host(`loki.localhost`)"
+  #     - "traefik.http.services.loki.loadbalancer.server.port=3100"
 
-  promtail:
-    image: grafana/promtail:latest
-    user: root
-    volumes:
-      - ./monitoring/promtail:/etc/promtail
-      - /var/log:/var/log
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    command: -config.file=/etc/promtail/config.yml
-    networks:
-      - laravel
-    depends_on:
-      - loki
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.promtail.rule=Host(`promtail.localhost`)"
-      - "traefik.http.services.promtail.loadbalancer.server.port=9080"
+  # promtail:
+  #   image: grafana/promtail:latest
+  #   user: root
+  #   volumes:
+  #     - ./monitoring/promtail:/etc/promtail
+  #     - /var/log:/var/log
+  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   command: -config.file=/etc/promtail/config.yml
+  #   networks:
+  #     - laravel
+  #   depends_on:
+  #     - loki
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.promtail.rule=Host(`promtail.localhost`)"
+  #     - "traefik.http.services.promtail.loadbalancer.server.port=9080"
 
 networks:
   laravel:
@@ -213,11 +213,11 @@ networks:
 volumes:
   mysql_data:
     name: laravel_mysql_data
-  prometheus_data:
-    name: laravel_prometheus_data
-  grafana_data:
-    name: laravel_grafana_data
-  loki_data:
-    name: laravel_loki_data
-  alertmanager_data:
-    name: laravel_alertmanager_data
+  # prometheus_data:
+  #   name: laravel_prometheus_data
+  # grafana_data:
+  #   name: laravel_grafana_data
+  # loki_data:
+  #   name: laravel_loki_data
+  # alertmanager_data:
+  #   name: laravel_alertmanager_data

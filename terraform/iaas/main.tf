@@ -157,7 +157,7 @@ resource "null_resource" "generate_inventory" {
       "cd /home/${var.username_app}/ansible/inventories",
       "echo 'all:' > hosts.yml",
       "echo '  hosts:' >> hosts.yml",
-      "echo '    slave1:' >> hosts.yml",
+      "echo '    azure_vm_one:' >> hosts.yml",
       "echo '      ansible_host: ${azurerm_dev_test_linux_virtual_machine.vmapp.fqdn}' >> hosts.yml",
       "echo '      ansible_user: ${var.username_app}' >> hosts.yml",
       "echo '      ansible_ssh_private_key_file: /home/${var.username_app}/.ssh/id_ed25519' >> hosts.yml",

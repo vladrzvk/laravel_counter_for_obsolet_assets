@@ -19,16 +19,42 @@ variable "lab_subnet_name" {
 }
  
 variable "lab_virtual_network_id" {
-  default = "/subscriptions/1eb5e572-df10-47a3-977e-b0ec272641e4/resourcegroups/t-clo-901-rns-0/providers/microsoft.devtestlab/labs/t-clo-901-rns-0/virtualnetworks/t-clo-901-rns-0"
   type        = string
+  sensitive = true
+}
+
+variable "instance_count" {
+  description = "number of instance to deploy"
+  type = number
 }
  
 variable "username_app" {
-  default = "appuser99"
+  description = "username"
   type        = string
+  sensitive = true
 }
  
 variable "password_app" {
-  default = "Pa$w0rd1234!"
+  description = "password"
   type        = string
+  sensitive = true
+}
+
+variable "ansible_laravel_repo" {
+  description = "remote repo with client app"
+  type        = string
+  sensitive = true
+}
+
+variable "docker_traefik_ports" {
+  description = ""
+  type = string
+  sensitive = true
+}
+
+
+variable "docker_db_connection" {
+  description = "db env var"
+  type = string
+  sensitive = true
 }
