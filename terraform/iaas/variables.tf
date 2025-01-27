@@ -26,6 +26,13 @@ variable "lab_virtual_network_id" {
 variable "instance_count" {
   description = "number of instance to deploy"
   type = number
+  default = 1
+}
+
+variable "algorithm_type" {
+  description = "ssh key algorithm"
+  sensitive = true
+  type = string
 }
  
 variable "username_app" {
@@ -46,15 +53,9 @@ variable "ansible_laravel_repo" {
   sensitive = true
 }
 
-variable "docker_traefik_ports" {
-  description = ""
-  type = string
-  sensitive = true
+variable "docker_env_vars" {
+  description = "Variables d'environnement pour Docker Compose"
+  type        = map(string)
+  sensitive   = true
 }
 
-
-variable "docker_db_connection" {
-  description = "db env var"
-  type = string
-  sensitive = true
-}

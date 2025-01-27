@@ -8,9 +8,10 @@ data "azurerm_dev_test_lab" "tclo" {
   name                = var.devtestlab_name
   resource_group_name = data.azurerm_resource_group.tclo.name
 }
-
+//TODO update without SSH KEY 
 # Create VM
 resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
+  count                  = ${var.instance_count} 
   name                   = "deplinux-test"
   lab_name               = data.azurerm_dev_test_lab.tclo.name
   resource_group_name    = data.azurerm_resource_group.tclo.name
@@ -37,6 +38,19 @@ resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
   }
 }
 
+//TODO 
+# Generate SSH keys with Terraform
+# resource "tls_private_key" "ssh_key" {
+#   algorithm = ${var.algorithm_type}
+# }
+
+# resource "local_file" "private_key" {
+#   content  = tls_private_key.ssh_key.private_key_openssh
+#   filename = "./ssh/id_ed25519"
+#   file_permission = "0600" # Permissions restrictives
+# }
+
+//TODO USE GENERATED KEY FOR CONNECTION
 # Install Python and Ansible
 resource "null_resource" "setup_ansible" {
   provisioner "remote-exec" {
@@ -82,6 +96,8 @@ resource "null_resource" "setup_ansible" {
   depends_on = [azurerm_dev_test_linux_virtual_machine.vmapp]
 }
 
+
+//TODO USE GENERATED KEY FOR CONNECTION
 # Upload Ansible directory
 resource "null_resource" "upload_ansible" {
   provisioner "file" {
@@ -99,6 +115,8 @@ resource "null_resource" "upload_ansible" {
   depends_on = [null_resource.setup_ansible]
 }
 
+
+//TODO USE GENERATED KEY FOR ANSIBLE SCRIPTS
 # Upload SSH key (private)
 resource "null_resource" "upload_ssh_key" {
   provisioner "file" {
@@ -130,6 +148,7 @@ resource "null_resource" "upload_ssh_key" {
   depends_on = [azurerm_dev_test_linux_virtual_machine.vmapp, null_resource.upload_ansible]
 }
 
+//TODO USE GENERATED KEY FOR ANSIBLE SCRIPTS
 # Convert the key to Unix format using dos2unix
 resource "null_resource" "format_ssh_key" {
   provisioner "remote-exec" {
@@ -149,6 +168,7 @@ resource "null_resource" "format_ssh_key" {
   depends_on = [null_resource.upload_ssh_key]
 }
 
+//TODO USE GENERATED KEY FOR ANSIBLE SCRIPTS
 # Generate inventory (unchanged)
 resource "null_resource" "generate_inventory" {
   provisioner "remote-exec" {
@@ -157,7 +177,7 @@ resource "null_resource" "generate_inventory" {
       "cd /home/${var.username_app}/ansible/inventories",
       "echo 'all:' > hosts.yml",
       "echo '  hosts:' >> hosts.yml",
-      "echo '    azure_vm_one:' >> hosts.yml",
+      "echo '    azure_vm_${var.instance_count}:' >> hosts.yml",
       "echo '      ansible_host: ${azurerm_dev_test_linux_virtual_machine.vmapp.fqdn}' >> hosts.yml",
       "echo '      ansible_user: ${var.username_app}' >> hosts.yml",
       "echo '      ansible_ssh_private_key_file: /home/${var.username_app}/.ssh/id_ed25519' >> hosts.yml",
@@ -175,6 +195,7 @@ resource "null_resource" "generate_inventory" {
   depends_on = [null_resource.upload_ansible, null_resource.format_ssh_key]
 }
 
+//TODO USE GENERATED KEY FOR ANSIBLE SCRIPTS
 # Run Ansible playbook
 resource "null_resource" "run_playbook" {
   provisioner "remote-exec" {

@@ -17,7 +17,7 @@
 #   roles:
 #     - mysql
 - name: Setup and deploy Laravel application
-  hosts: azure_vm_one
+  hosts: azure_vm_1
   become: true
   roles:
     - install_docker

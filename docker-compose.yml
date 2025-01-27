@@ -25,6 +25,7 @@ services:
     volumes:
       - ./demo:/var/www/html
     working_dir: /var/www/html
+    env_file: .env  
     environment:
       - APP_NAME=Laravel
       - APP_ENV=local
@@ -62,6 +63,7 @@ services:
 
   db:
     image: mysql:8.0
+    env_file: .env
     environment:
       - MYSQL_DATABASE=${DB_DATABASE}
       - MYSQL_USER=${DB_USERNAME}

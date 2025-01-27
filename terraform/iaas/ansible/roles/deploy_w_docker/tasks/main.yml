@@ -63,6 +63,14 @@
   when: all_containers.stdout != ""
   ignore_errors: true
 
+- name: Créer le fichier .env pour Docker
+    copy:
+      content: |
+        {% for key, value in docker_env_vars.items() %}
+        {{ key }}={{ value }}
+        {% endfor %}
+      dest: /var/www/sample-app/.env
+
 - name: Run Docker Compose for sample-app
   command: docker-compose up -d
   args:
