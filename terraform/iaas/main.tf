@@ -11,7 +11,7 @@ data "azurerm_dev_test_lab" "tclo" {
 //TODO update without SSH KEY 
 # Create VM
 resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
-  count                  = ${var.instance_count} 
+  # count                  = var.instance_count
   name                   = "deplinux-test"
   lab_name               = data.azurerm_dev_test_lab.tclo.name
   resource_group_name    = data.azurerm_resource_group.tclo.name
