@@ -84,43 +84,75 @@
     chdir: /var/www/sample-app
 
 
-- name: Patiente pendant 20 secondes
-  ansible.builtin.pause:
-    seconds: 20
+# - name: Patiente pendant 20 secondes
+#   ansible.builtin.pause:
+#     seconds: 20
+#   become: true
+
+
+- name: Attendre que MySQL soit prêt (max 200 secondes)
+  block:
+    - name: Vérifier la connexion à MySQL
+      command: >
+        mysql -h {{ docker_env_vars.DB_HOST }}
+              -u{{ docker_env_vars.DB_USERNAME }}
+              -p{{ docker_env_vars.DB_PASSWORD }}
+              -e "SELECT 1;"
+      register: mysql_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Attendre 20 secondes avant de réessayer si la connexion échoue
+      ansible.builtin.pause:
+        seconds: 20
+      when: mysql_check.failed
+
+  retries: 10
+  delay: 0
+  until: mysql_check is succeeded
   become: true
-
-
-# Vérifier si les migrations existent
-- name: Vérifier si des migrations existent
+  
+# Vérifier l'état des migrations Laravel
+- name: Vérifier si des migrations sont déjà appliquées
+  # EN: Run 'php artisan migrate:status' to see if the DB is up-to-date or not
   command: docker exec sample-app_app_1 php artisan migrate:status
   register: migrations_status
-  ignore_errors: true
+  changed_when: false       # EN: We don't consider this as "changed" for Ansible
+  failed_when: false        # EN: Even if it returns a non-zero code, we won't fail immediately
   become: true
 
-# Créer une migration si aucune migration n'existe
-- name: Créer une migration si nécessaire
+# Créer une migration init si aucune migration n'est détectée
+- name: Créer une migration si aucune n'existe
+  # EN: If rc != 0, it probably means there are no migrations table or something is missing.
+  #     We create a basic init_migration as in your original logic.
   command: docker exec sample-app_app_1 php artisan make:migration init_migration
   when: migrations_status.rc != 0
   become: true
 
-# Exécuter les migrations
+# Exécuter les migrations uniquement si elles ne sont pas encore à jour
 - name: Exécuter les migrations Laravel
+  # EN: If rc == 0, that means everything is up-to-date. If != 0, we run 'migrate --force'.
   command: docker exec sample-app_app_1 php artisan migrate --force
   register: migration_output
+  when: migrations_status.rc != 0
   become: true
 
-# Afficher le résultat des migrations
+# Afficher le résultat des migrations uniquement si elles ont été exécutées
 - name: Afficher le résultat des migrations
   debug:
     var: migration_output.stdout
+  when: migrations_status.rc != 0
 
 # Exécuter le seeding de la base de données
 - name: Remplir la base de données avec des données de seeders
+  # EN: We only seed if we actually had to run migrations.
   command: docker exec sample-app_app_1 php artisan db:seed --force
   register: seed_output
+  when: migrations_status.rc != 0
   become: true
 
 # Afficher le résultat du seeding
 - name: Afficher le résultat du seeding
   debug:
     var: seed_output.stdout
+  when: migrations_status.rc != 0

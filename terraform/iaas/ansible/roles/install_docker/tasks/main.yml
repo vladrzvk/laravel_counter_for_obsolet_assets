@@ -12,6 +12,7 @@
       - curl
       - zip
       - unzip
+      - tzdata
       - docker.io
       - docker-compose
     state: present
