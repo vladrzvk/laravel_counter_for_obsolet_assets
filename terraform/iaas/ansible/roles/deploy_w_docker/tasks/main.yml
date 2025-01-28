@@ -84,34 +84,21 @@
     chdir: /var/www/sample-app
 
 
-# - name: Patiente pendant 20 secondes
-#   ansible.builtin.pause:
-#     seconds: 20
-#   become: true
-
-
-- name: Attendre que MySQL soit prêt (max 200 secondes)
-  block:
-    - name: Vérifier la connexion à MySQL
-      command: >
-        mysql -h {{ docker_env_vars.DB_HOST }}
-              -u{{ docker_env_vars.DB_USERNAME }}
-              -p{{ docker_env_vars.DB_PASSWORD }}
-              -e "SELECT 1;"
-      register: mysql_check
-      ignore_errors: true
-      changed_when: false
-
-    - name: Attendre 20 secondes avant de réessayer si la connexion échoue
-      ansible.builtin.pause:
-        seconds: 20
-      when: mysql_check.failed
-
+- name: Attendre que MySQL dans le conteneur soit prêt 
+  command: >
+    docker exec sample-app_db_1
+    mysql -h 127.0.0.1
+          -u{{ docker_env_vars.DB_USERNAME }}
+          -p{{ docker_env_vars.DB_PASSWORD }}
+          -e "SELECT 1;"
+  register: mysql_check
+  changed_when: false        # EN: We don't consider it "changed" if the command finally works
+  failed_when: false         # EN: We don't fail immediately if rc != 0
   retries: 10
-  delay: 0
-  until: mysql_check is succeeded
+  delay: 20
+  until: mysql_check.rc == 0
   become: true
-  
+
 # Vérifier l'état des migrations Laravel
 - name: Vérifier si des migrations sont déjà appliquées
   # EN: Run 'php artisan migrate:status' to see if the DB is up-to-date or not
@@ -149,7 +136,7 @@
   command: docker exec sample-app_app_1 php artisan db:seed --force
   register: seed_output
   when: migrations_status.rc != 0
-  become: true
+  become: true  
 
 # Afficher le résultat du seeding
 - name: Afficher le résultat du seeding
