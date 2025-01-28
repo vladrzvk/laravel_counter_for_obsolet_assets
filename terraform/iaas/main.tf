@@ -8,10 +8,26 @@ data "azurerm_dev_test_lab" "tclo" {
   name                = var.devtestlab_name
   resource_group_name = data.azurerm_resource_group.tclo.name
 }
+
+
+//TODO 
+# Generate SSH keys with Terraform
+# resource "tls_private_key" "ssh_key" {
+#   algorithm = ${var.algorithm_type}
+# }
+
+# resource "local_file" "private_key" {
+#   content  = tls_private_key.ssh_key.private_key_openssh
+#   filename = "./ssh/id_ed25519"
+#   file_permission = "0600" # Permissions restrictives
+# }
+
+
 //TODO update without SSH KEY 
 # Create VM
 resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
   # count                  = var.instance_count
+  # name  = "deplinux-test-${count.index}" 
   name                   = "deplinux-test"
   lab_name               = data.azurerm_dev_test_lab.tclo.name
   resource_group_name    = data.azurerm_resource_group.tclo.name
@@ -20,6 +36,7 @@ resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
   username               = var.username_app
   password               = var.password_app
   ssh_key                = file("./ssh/id_ed25519.pub")
+  # ssh_key = tls_private_key.ssh_key.public_key_openssh
   lab_virtual_network_id = var.lab_virtual_network_id
   lab_subnet_name        = var.lab_subnet_name
   storage_type           = "Standard"
@@ -39,21 +56,11 @@ resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
 }
 
 locals {
-  docker_env_vars_json = jsonencode(var.docker_env_vars)
+  docker_env_vars_json = jsonencode({
+    docker_env_vars = var.docker_env_vars
+  })
 }
 
-
-//TODO 
-# Generate SSH keys with Terraform
-# resource "tls_private_key" "ssh_key" {
-#   algorithm = ${var.algorithm_type}
-# }
-
-# resource "local_file" "private_key" {
-#   content  = tls_private_key.ssh_key.private_key_openssh
-#   filename = "./ssh/id_ed25519"
-#   file_permission = "0600" # Permissions restrictives
-# }
 
 //TODO USE GENERATED KEY FOR CONNECTION
 # Install Python and Ansible
@@ -95,6 +102,7 @@ resource "null_resource" "setup_ansible" {
       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
       user        = var.username_app
       private_key = file("./ssh/id_ed25519")
+    # private_key = file(local_file.private_key.filename)
     }
   }
 
