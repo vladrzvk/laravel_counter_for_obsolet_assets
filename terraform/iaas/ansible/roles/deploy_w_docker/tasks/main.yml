@@ -23,7 +23,7 @@
   git:
     repo: https://github.com/vladrzvk/laravel_counter_for_obsolet_assets.git
     dest: /var/www/sample-app
-    version: implementation_playbooks
+    version: iaas
     force: yes
   become: true
 
@@ -63,13 +63,25 @@
   when: all_containers.stdout != ""
   ignore_errors: true
 
-- name: Créer le fichier .env pour Docker
-    copy:
-      content: |
-        {% for key, value in docker_env_vars.items() %}
-        {{ key }}={{ value }}
-        {% endfor %}
-      dest: /var/www/sample-app/.env
+- name: Vérifier les variables d'environnement Docker
+  debug:
+    var: docker_env_vars
+
+# - name: Créer le fichier .env pour Docker
+#   copy:
+#     content: |
+#       {% for key, value in docker_env_vars.items() %}
+#       {{ key }}={{ value }}
+#       {% endfor %}
+#     dest: /var/www/sample-app/.env
+#     owner: www-data
+#     group: www-data
+#     mode: '0644'
+
+- name: crée le fichier d'environnement Docker
+  shell: cat docker_env_vars | jq -r '.[] | "\(.OptionName)=\(.Value)"' > .env
+  args:
+    chdir: /var/www/sample-app
 
 - name: Run Docker Compose for sample-app
   command: docker-compose up -d

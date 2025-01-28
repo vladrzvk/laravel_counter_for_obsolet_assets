@@ -38,6 +38,11 @@ resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
   }
 }
 
+locals {
+  docker_env_vars_json = jsonencode(var.docker_env_vars)
+}
+
+
 //TODO 
 # Generate SSH keys with Terraform
 # resource "tls_private_key" "ssh_key" {
@@ -177,7 +182,7 @@ resource "null_resource" "generate_inventory" {
       "cd /home/${var.username_app}/ansible/inventories",
       "echo 'all:' > hosts.yml",
       "echo '  hosts:' >> hosts.yml",
-      "echo '    azure_vm_${var.instance_count}:' >> hosts.yml",
+      "echo '    azure_vm_one:' >> hosts.yml",
       "echo '      ansible_host: ${azurerm_dev_test_linux_virtual_machine.vmapp.fqdn}' >> hosts.yml",
       "echo '      ansible_user: ${var.username_app}' >> hosts.yml",
       "echo '      ansible_ssh_private_key_file: /home/${var.username_app}/.ssh/id_ed25519' >> hosts.yml",
@@ -202,7 +207,7 @@ resource "null_resource" "run_playbook" {
     inline = [
       "set -eux",
       "mkdir -p ~/.ssh && ssh-keyscan -H ${azurerm_dev_test_linux_virtual_machine.vmapp.fqdn} >> ~/.ssh/known_hosts",
-      "~/.local/bin/ansible-playbook -i /home/${var.username_app}/ansible/inventories/hosts.yml /home/${var.username_app}/ansible/playbook.yml -vv"
+      "~/.local/bin/ansible-playbook -i /home/${var.username_app}/ansible/inventories/hosts.yml   /home/${var.username_app}/ansible/playbook.yml --extra-vars '${local.docker_env_vars_json}' -vv"
     ]
 
     connection {
