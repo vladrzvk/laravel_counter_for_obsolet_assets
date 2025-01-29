@@ -1,5 +1,10 @@
 ---
 # tasks file for deploy_w_docker
+
+- name: Debug FQDN
+  debug:
+    var: docker_env_vars.AZ_FQDN
+    
 - name: Supprimer complètement le répertoire existant
   file:
     path: /var/www/sample-app

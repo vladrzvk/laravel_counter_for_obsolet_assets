@@ -56,9 +56,19 @@ resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
 }
 
 locals {
+
+  # Récupère la FQDN générée par la VM d'azure
+  fqdn = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
+
+  # Fusionne la map existante var.docker_env_vars avec la nouvelle clé "AZ_FQDN"
+  docker_env_vars_merged = merge(
+    var.docker_env_vars,
+    { "AZ_FQDN" = local.fqdn }
+  )
   docker_env_vars_json = jsonencode({
     docker_env_vars = var.docker_env_vars
   })
+
 }
 
 
