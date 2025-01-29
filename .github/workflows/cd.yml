@@ -28,6 +28,11 @@ jobs:
     #     with:
     #       terraform_version: "1.10.0" 
 
+      # - name: Azure Login
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+
     #   - name: Créer terraform.tfvars
     #     run: |
     #       echo "lab_virtual_network_id = \"${{ secrets.LAB_VIRTUAL_NETWORK_ID }}\"" >> terraform.tfvars
