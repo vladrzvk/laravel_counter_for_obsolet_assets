@@ -78,7 +78,7 @@
       {% for key, value in docker_env_vars.items() %}
       {{ key }}={{ value }}
       {% endfor %}
-    dest: /var/www/sample-app/.env
+    dest: /var/www/sample-app/demo/.env
     owner: www-data
     group: www-data
     mode: '0644'
