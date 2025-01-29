@@ -72,13 +72,24 @@
   debug:
     var: docker_env_vars
 
-- name: Créer le fichier .env pour Docker
+- name: Créer le fichier .env pour laravel
   copy:
     content: |
       {% for key, value in docker_env_vars.items() %}
       {{ key }}={{ value }}
       {% endfor %}
     dest: /var/www/vm-laravel-folder/demo/.env
+    owner: www-data
+    group: www-data
+    mode: '0644'
+
+- name: Créer le fichier .env pour Docker
+  copy:
+    content: |
+      {% for key, value in docker_env_vars.items() %}
+      {{ key }}={{ value }}
+      {% endfor %}
+    dest: /var/www/vm-laravel-folder/.env
     owner: www-data
     group: www-data
     mode: '0644'
