@@ -2,23 +2,24 @@ services:
   traefik:
     image: traefik:latest
     command:
-      - "--api.insecure=true"
+      # - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.metrics.address=:8082"
       - "--api.dashboard=true"
     ports:
-      - "8081:80"
-      - "8080:8080"
+      - "80:80"
+      - "8082:8082"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - laravel
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.localhost`)"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.entrypoints=web"
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.dashboard.rule=Host(`traefik.localhost`)"
+    #   - "traefik.http.routers.dashboard.service=api@internal"
+    #   - "traefik.http.routers.dashboard.entrypoints=web"
 
   app:
     image: bitnami/laravel:latest
@@ -50,7 +51,7 @@ services:
       bash -c "composer install &&
               php artisan key:generate --force || true &&
               php artisan migrate --force || true &&
-              php artisan serve --host=0.0.0.0 --port=8000"
+              php artisan serve --host=0.0.0.0 --port=8081"
     depends_on:
       db:
         condition: service_started
@@ -58,9 +59,10 @@ services:
       - laravel
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.laravel.rule=Host(`laravel.localhost`) || Host(`localhost`)"
-      - "traefik.http.routers.laravel.entrypoints=web"
-      - "traefik.http.services.laravel.loadbalancer.server.port=8000"
+      # - "traefik.http.routers.laravel.rule=Host(`laravel.localhost`) || Host(`localhost`)"
+      - "traefik.http.routers.laravel.rule=Host(`${AZ_FQDN}`)"
+      # - "traefik.http.routers.laravel.entrypoints=web"
+      - "traefik.http.services.laravel.loadbalancer.server.port=8081"
 
   db:
     image: mysql:8.0
