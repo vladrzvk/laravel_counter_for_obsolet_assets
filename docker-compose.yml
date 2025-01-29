@@ -70,7 +70,7 @@ services:
 
   db:
     image: mysql:8.0
-    env_file: ./demo/.env
+    env_file: .env
     environment:
       - MYSQL_DATABASE=${DB_DATABASE}
       - MYSQL_USER=${DB_USERNAME}
