@@ -12,7 +12,7 @@ data "azurerm_dev_test_lab" "tclo" {
 
 # Generate SSH keys with Terraform
 resource "tls_private_key" "ssh_key" {
-  algorithm = ${var.algorithm_type}
+  algorithm = var.algorithm_type
 }
 resource "local_file" "private_key" {
   content  = tls_private_key.ssh_key.private_key_openssh
