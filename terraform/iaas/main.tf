@@ -66,7 +66,7 @@ locals {
     { "AZ_FQDN" = local.fqdn }
   )
   docker_env_vars_json = jsonencode({
-    docker_env_vars = var.docker_env_vars
+    docker_env_vars = local.docker_env_vars_merged
   })
 
 }
