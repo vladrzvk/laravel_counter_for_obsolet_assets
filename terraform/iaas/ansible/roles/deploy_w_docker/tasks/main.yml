@@ -7,34 +7,34 @@
     
 - name: Supprimer complètement le répertoire existant
   file:
-    path: /var/www/sample-app
+    path: /var/www/vm-laravel-folder
     state: absent
   become: true
 
-- name: Recreate /var/www/sample-app directory
+- name: Recreate /var/www/vm-laravel-folder directory
   file:
-    path: /var/www/sample-app
+    path: /var/www/vm-laravel-folder
     state: directory
     owner: www-data
     group: www-data
     mode: '0755'
     recurse: true
 
-- name: Rends /var/www/sample-app comme 'safe' Git repository
-  command: git config --global --add safe.directory /var/www/sample-app
+- name: Rends /var/www/vm-laravel-folder comme 'safe' Git repository
+  command: git config --global --add safe.directory /var/www/vm-laravel-folder
   become: true
 
 - name: Cloner le dépôt Laravel
   git:
     repo: https://github.com/vladrzvk/laravel_counter_for_obsolet_assets.git
-    dest: /var/www/sample-app
+    dest: /var/www/vm-laravel-folder
     version: iaas
     force: yes
   become: true
 
-- name: Accorde les droits necessaire pour sample-app
+- name: Accorde les droits necessaire pour vm-laravel-folder
   file:
-    path: /var/www/sample-app
+    path: /var/www/vm-laravel-folder
     owner: www-data
     group: www-data
     recurse: true
@@ -45,8 +45,8 @@
     mode: '0775'
     recurse: true
   loop:
-    - /var/www/sample-app/storage
-    - /var/www/sample-app/bootstrap/cache
+    - /var/www/vm-laravel-folder/storage
+    - /var/www/vm-laravel-folder/bootstrap/cache
 
 - name: Check s'il y a des conteneurs en cours
   shell: docker ps -q
@@ -78,20 +78,20 @@
       {% for key, value in docker_env_vars.items() %}
       {{ key }}={{ value }}
       {% endfor %}
-    dest: /var/www/sample-app/demo/.env
+    dest: /var/www/vm-laravel-folder/demo/.env
     owner: www-data
     group: www-data
     mode: '0644'
 
-- name: Run Docker Compose for sample-app
+- name: Run Docker Compose for vm-laravel-folder
   command: docker-compose up -d
   args:
-    chdir: /var/www/sample-app
+    chdir: /var/www/vm-laravel-folder
 
 
 - name: Attendre que MySQL dans le conteneur soit prêt 
   command: >
-    docker exec sample-app_db_1
+    docker exec vm-laravel-folder_db_1
     mysql -h 127.0.0.1
           -u{{ docker_env_vars.DB_USERNAME }}
           -p{{ docker_env_vars.DB_PASSWORD }}
@@ -107,7 +107,7 @@
 # Vérifier l'état des migrations Laravel
 - name: Vérifier si des migrations sont déjà appliquées
   # EN: Run 'php artisan migrate:status' to see if the DB is up-to-date or not
-  command: docker exec sample-app_app_1 php artisan migrate:status
+  command: docker exec vm-laravel-folder_app_1 php artisan migrate:status
   register: migrations_status
   changed_when: false       # EN: We don't consider this as "changed" for Ansible
   failed_when: false        # EN: Even if it returns a non-zero code, we won't fail immediately
@@ -117,14 +117,14 @@
 - name: Créer une migration si aucune n'existe
   # EN: If rc != 0, it probably means there are no migrations table or something is missing.
   #     We create a basic init_migration as in your original logic.
-  command: docker exec sample-app_app_1 php artisan make:migration init_migration
+  command: docker exec vm-laravel-folder_app_1 php artisan make:migration init_migration
   when: migrations_status.rc != 0
   become: true
 
 # Exécuter les migrations uniquement si elles ne sont pas encore à jour
 - name: Exécuter les migrations Laravel
   # EN: If rc == 0, that means everything is up-to-date. If != 0, we run 'migrate --force'.
-  command: docker exec sample-app_app_1 php artisan migrate --force
+  command: docker exec vm-laravel-folder_app_1 php artisan migrate --force
   register: migration_output
   when: migrations_status.rc != 0
   become: true
@@ -138,7 +138,7 @@
 # Exécuter le seeding de la base de données
 - name: Remplir la base de données avec des données de seeders
   # EN: We only seed if we actually had to run migrations.
-  command: docker exec sample-app_app_1 php artisan db:seed --force
+  command: docker exec vm-laravel-folder_app_1 php artisan db:seed --force
   register: seed_output
   when: migrations_status.rc != 0
   become: true  
