@@ -1,0 +1,59 @@
+name: Laravel CD
+
+# Déclenchement uniquement sur la branche "iaas"
+on:
+  push:
+    branches: [ 'iaas' ]
+
+jobs:
+  deploy:
+    name: Deploy to Production (CD)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy placeholder
+        run: |
+          echo "This is where the deployment commands would go."
+          echo "For instance: calling Terraform, Ansible, or a script."
+
+    # steps:
+    #   - name: Checkout repository
+    #     uses: actions/checkout@v3
+
+    #   - name: Install Terraform
+    #     uses: hashicorp/setup-terraform@v2
+    #     with:
+    #       terraform_version: "1.10.0" 
+
+    #   - name: Créer terraform.tfvars
+    #     run: |
+    #       echo "lab_virtual_network_id = \"${{ secrets.LAB_VIRTUAL_NETWORK_ID }}\"" >> terraform.tfvars
+    #       echo "algorithm_type = \"${{ secrets.ALGORITHM_TYPE }}\"" >> terraform.tfvars
+    #       echo "username_app = \"${{ secrets.USERNAME_APP }}\"" >> terraform.tfvars
+    #       echo "password_app = \"${{ secrets.PASSWORD_APP }}\"" >> terraform.tfvars
+    #       echo "ansible_laravel_repo = \"${{ secrets.ANSIBLE_LARAVEL_REPO }}\"" >> terraform.tfvars
+    #       echo "docker_env_vars = {" >> terraform.tfvars
+    #       echo "  DB_CONNECTION = \"${{ secrets.DB_CONNECTION }}\"" >> terraform.tfvars
+    #       echo "  DB_HOST = \"${{ secrets.DB_HOST }}\"" >> terraform.tfvars
+    #       echo "  DB_PORT = \"${{ secrets.DB_PORT }}\"" >> terraform.tfvars
+    #       echo "  DB_DATABASE = \"${{ secrets.DB_DATABASE }}\"" >> terraform.tfvars
+    #       echo "  DB_USERNAME = \"${{ secrets.DB_USERNAME }}\"" >> terraform.tfvars
+    #       echo "  DB_PASSWORD = \"${{ secrets.DB_PASSWORD }}\"" >> terraform.tfvars
+    #       echo "  DB_ROOT_PASSWORD = \"${{ secrets.DB_ROOT_PASSWORD }}\"" >> terraform.tfvars
+    #       echo "  APP_KEY = \"${{ secrets.APP_KEY }}\"" >> terraform.tfvars
+    #       echo "}" >> terraform.tfvars
+
+    #   - name: Initialize Terraform
+    #     run: terraform init
+
+    #   - name: Destroy Previous Infrastructure
+    #     run: terraform destroy -auto-approve
+
+    #   - name: Plan Deployment
+    #     run: terraform plan -out=tfplan
+
+    #   - name: Apply Deployment
+    #     run: terraform apply -auto-approve tfplan

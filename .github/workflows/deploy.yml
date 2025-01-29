@@ -1,0 +1,14 @@
+env:
+  LAB_VIRTUAL_NETWORK_ID: ${{ secrets.LAB_VIRTUAL_NETWORK_ID }}
+  ALGORITHM_TYPE: ${{ secrets.ALGORITHM_TYPE }}
+  USERNAME_APP: ${{ secrets.USERNAME_APP }}
+  PASSWORD_APP: ${{ secrets.PASSWORD_APP }}
+  ANSIBLE_LARAVEL_REPO: ${{ secrets.ANSIBLE_LARAVEL_REPO }}
+  DB_CONNECTION: ${{ secrets.DB_CONNECTION }}
+  DB_HOST: ${{ secrets.DB_HOST }}
+  DB_PORT: ${{ secrets.DB_PORT }}
+  DB_DATABASE: ${{ secrets.DB_DATABASE }}
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+  APP_KEY: ${{ secrets.APP_KEY }}

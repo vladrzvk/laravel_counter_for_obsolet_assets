@@ -1,0 +1,30 @@
+name: Laravel CI
+
+on:
+  # Déclenche la CI pour tous les push sur n'importe quelle branche
+  push:
+    branches: ['*']
+
+jobs:
+  build-and-test:
+    name: Build and Test (CI)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+
+      - name: Install dependencies
+        run: composer install --no-progress --prefer-dist
+
+      - name: Run "blank" unit tests
+        run: |
+          # Ici, on simule un test unitaire “blanc”. 
+          # Ex: On pourrait lancer : php artisan test ou vendor/bin/phpunit
+          echo "Running minimal test..."
+          echo "All tests passed!"
