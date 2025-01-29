@@ -42,7 +42,7 @@ services:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - APP_KEY=${APP_KEY}
+      # - APP_KEY=${APP_KEY}
       - LOG_CHANNEL=stack
       - LOG_LEVEL=debug
       - BROADCAST_DRIVER=log
@@ -52,7 +52,7 @@ services:
       - SESSION_LIFETIME=120
     command: >
       bash -c "composer install &&
-              php artisan key:generate --force || true &&
+              php artisan key:generate --force &&
               php artisan migrate --force || true &&
               php artisan serve --host=0.0.0.0 --port=8081"
     depends_on:
