@@ -108,8 +108,8 @@
           -p{{ docker_env_vars.DB_PASSWORD }}
           -e "SELECT 1;"
   register: mysql_check
-  changed_when: false        # EN: We don't consider it "changed" if the command finally works
-  failed_when: false         # EN: We don't fail immediately if rc != 0
+  changed_when: false
+  failed_when: false        
   retries: 10
   delay: 20
   until: mysql_check.rc == 0

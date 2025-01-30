@@ -31,14 +31,14 @@ variable "instance_count" {
 
 variable "algorithm_type" {
   description = "ssh key algorithm"
-  sensitive = true
+  # sensitive = true
   type = string
 }
  
 variable "username_app" {
   description = "username"
   type        = string
-  sensitive = true
+  # sensitive = true
 }
  
 variable "password_app" {
@@ -50,12 +50,12 @@ variable "password_app" {
 variable "ansible_laravel_repo" {
   description = "remote repo with client app"
   type        = string
-  sensitive = true
+  # sensitive = true
 }
 
 variable "docker_env_vars" {
   description = "Variables d'environnement pour Docker Compose"
   type        = map(string)
-  sensitive   = true
+  # sensitive   = true
 }
 
