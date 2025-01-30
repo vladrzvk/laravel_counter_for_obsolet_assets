@@ -29,11 +29,11 @@ variable "instance_count" {
   default = 1
 }
 
-variable "algorithm_type" {
-  description = "ssh key algorithm"
-  # sensitive = true
-  type = string
-}
+# variable "algorithm_type" {
+#   description = "ssh key algorithm"
+#   # sensitive = true
+#   type = string
+# }
  
 variable "username_app" {
   description = "username"

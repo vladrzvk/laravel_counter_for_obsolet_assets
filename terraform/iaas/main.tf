@@ -36,7 +36,7 @@ resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
   size                   = "Standard_A4_v2"
   username               = var.username_app
   password               = var.password_app
-  ssh_key                = file("./ssh/id_ed25519.pub")
+  ssh_key                = file("./ssh/id_terraform.pub")
   # ssh_key                = local.public_key_openssh
   lab_virtual_network_id = var.lab_virtual_network_id
   lab_subnet_name        = var.lab_subnet_name
@@ -110,7 +110,7 @@ resource "null_resource" "setup_ansible" {
       type        = "ssh"
       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
       user        = var.username_app
-      private_key = file("./ssh/id_ed25519")
+      private_key = file("./ssh/id_terraform")
       # private_key = file(local_file.private_key.filename)
     }
   }
@@ -129,7 +129,7 @@ resource "null_resource" "upload_ansible" {
       type        = "ssh"
       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
       user        = var.username_app
-      private_key = file("./ssh/id_ed25519")
+      private_key = file("./ssh/id_terraform")
       # private_key = file(local_file.private_key.filename)
     }
   }
@@ -140,15 +140,15 @@ resource "null_resource" "upload_ansible" {
 # Upload SSH key (private)
 resource "null_resource" "upload_ssh_key" {
   provisioner "file" {
-    source      = "./ssh/id_ed25519"
+    source      = "./ssh/id_terraform"
     # source = local_file.private_key.filename
-    destination = "/home/${var.username_app}/.ssh/id_ed25519"
+    destination = "/home/${var.username_app}/.ssh/id_terraform"
 
     connection {
       type        = "ssh"
       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
       user        = var.username_app
-      private_key = file("./ssh/id_ed25519")
+      private_key = file("./ssh/id_terraform")
       # private_key = file(local_file.private_key.filename)
     }
   }
@@ -156,7 +156,7 @@ resource "null_resource" "upload_ssh_key" {
   provisioner "remote-exec" {
     inline = [
       "chmod 700 /home/${var.username_app}/.ssh",
-      "chmod 600 /home/${var.username_app}/.ssh/id_ed25519"
+      "chmod 600 /home/${var.username_app}/.ssh/id_terraform"
     ]
 
     connection {
@@ -164,7 +164,7 @@ resource "null_resource" "upload_ssh_key" {
       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
       user        = var.username_app
       # private_key = file(local_file.private_key.filename)
-      private_key = file("./ssh/id_ed25519")
+      private_key = file("./ssh/id_terraform")
     }
   }
 
@@ -176,7 +176,7 @@ resource "null_resource" "format_ssh_key" {
   provisioner "remote-exec" {
     inline = [
       "sudo apt-get update && sudo apt-get install -y dos2unix",
-      "dos2unix /home/${var.username_app}/.ssh/id_ed25519"
+      "dos2unix /home/${var.username_app}/.ssh/id_terraform"
     ]
 
     connection {
@@ -184,7 +184,7 @@ resource "null_resource" "format_ssh_key" {
       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
       user        = var.username_app
       # private_key = file(local_file.private_key.filename)
-      private_key = file("./ssh/id_ed25519")
+      private_key = file("./ssh/id_terraform")
     }
   }
 
@@ -202,7 +202,7 @@ resource "null_resource" "generate_inventory" {
       "echo '    azure_vm_one:' >> hosts.yml",
       "echo '      ansible_host: ${azurerm_dev_test_linux_virtual_machine.vmapp.fqdn}' >> hosts.yml",
       "echo '      ansible_user: ${var.username_app}' >> hosts.yml",
-      "echo '      ansible_ssh_private_key_file: /home/${var.username_app}/.ssh/id_ed25519' >> hosts.yml",
+      "echo '      ansible_ssh_private_key_file: /home/${var.username_app}/.ssh/id_terraform' >> hosts.yml",
       "echo '      ansible_ssh_common_args: \"-o StrictHostKeyChecking=no\"' >> hosts.yml"
     ]
 
@@ -211,7 +211,7 @@ resource "null_resource" "generate_inventory" {
       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
       user        = var.username_app
       # private_key = file(local_file.private_key.filename)
-      private_key = file("./ssh/id_ed25519")
+      private_key = file("./ssh/id_terraform")
     }
   }
 
@@ -232,7 +232,7 @@ resource "null_resource" "run_playbook" {
       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
       user        = var.username_app
       # private_key = file(local_file.private_key.filename)
-      private_key = file("./ssh/id_ed25519")
+      private_key = file("./ssh/id_terraform")
     }
   }
 
