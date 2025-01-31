@@ -18,9 +18,7 @@ yarn-error.log
 ./monitoring/loki_data
 
 # Terraform
-terraform/.terraform/
-terraform/*.tfstate
-terraform/*.tfstate.*
-terraform/*.tfvars
-terraform/*.tfvars.json
-terraform/plan*
+*.tfvars
+*.tfstate
+*.tfstate.*
+.terraform/
