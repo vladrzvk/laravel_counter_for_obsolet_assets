@@ -153,10 +153,31 @@ resource "null_resource" "upload_ssh_key" {
     }
   }
 
+  provisioner "file" {
+    source      = "./ssh/id_terraform.pub"
+    # source = local_file.private_key.filename
+    destination = "/home/${var.username_app}/.ssh/id_terraform.pub"
+
+    connection {
+      type        = "ssh"
+      host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
+      user        = var.username_app
+      private_key = file("./ssh/id_terraform")
+      # private_key = file(local_file.private_key.filename)
+    }
+  }
+
   provisioner "remote-exec" {
     inline = [
       "chmod 700 /home/${var.username_app}/.ssh",
-      "chmod 600 /home/${var.username_app}/.ssh/id_terraform"
+      "chmod 600 /home/${var.username_app}/.ssh/id_terraform",
+      "chmod 644 /home/${var.username_app}/.ssh/id_terraform.pub",
+      "touch /home/${var.username_app}/.ssh/authorized_keys",
+      "chmod 600 /home/${var.username_app}/.ssh/authorized_keys",
+      "cat /home/${var.username_app}/.ssh/id_terraform.pub >> /home/${var.username_app}/.ssh/authorized_keys",
+      "touch /home/${var.username_app}/.ssh/config",
+      "echo 'Host *' > /home/${var.username_app}/.ssh/config",
+      "echo '    StrictHostKeyChecking no' >> /home/${var.username_app}/.ssh/config"
     ]
 
     connection {
@@ -175,8 +196,11 @@ resource "null_resource" "upload_ssh_key" {
 # resource "null_resource" "format_ssh_key" {
 #   provisioner "remote-exec" {
 #     inline = [
-#       "sudo apt-get update && sudo apt-get install -y dos2unix",
-#       "dos2unix /home/${var.username_app}/.ssh/id_terraform"
+#       # "sudo apt-get update && sudo apt-get install -y dos2unix",
+#       # "dos2unix /home/${var.username_app}/.ssh/id_terraform"
+#       "set -eux",
+#       "mkdir -p ~/.ssh",
+
 #     ]
 
 #     connection {
@@ -224,9 +248,8 @@ resource "null_resource" "generate_inventory" {
 resource "null_resource" "run_playbook" {
   provisioner "remote-exec" {
     inline = [
-      "set -eux",
-      "mkdir -p ~/.ssh && ssh-keyscan -H ${azurerm_dev_test_linux_virtual_machine.vmapp.fqdn} >> ~/.ssh/known_hosts",
-      "~/.local/bin/ansible-playbook -i /home/${var.username_app}/ansible/inventories/hosts.yml   /home/${var.username_app}/ansible/playbook.yml --extra-vars '${local.docker_env_vars_json}' -vv"
+      "ssh-keyscan -H ${azurerm_dev_test_linux_virtual_machine.vmapp.fqdn} >> ~/.ssh/known_hosts",
+      "~/.local/bin/ansible-playbook -i /home/${var.username_app}/ansible/inventories/hosts.yml /home/${var.username_app}/ansible/playbook.yml --extra-vars '${local.docker_env_vars_json}' -vv"
     ]
 
     connection {
