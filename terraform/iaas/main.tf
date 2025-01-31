@@ -171,25 +171,25 @@ resource "null_resource" "upload_ssh_key" {
   depends_on = [azurerm_dev_test_linux_virtual_machine.vmapp, null_resource.upload_ansible]
 }
 
-# Convert the key to Unix format using dos2unix
-resource "null_resource" "format_ssh_key" {
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt-get update && sudo apt-get install -y dos2unix",
-      "dos2unix /home/${var.username_app}/.ssh/id_terraform"
-    ]
+# # Convert the key to Unix format using dos2unix
+# resource "null_resource" "format_ssh_key" {
+#   provisioner "remote-exec" {
+#     inline = [
+#       "sudo apt-get update && sudo apt-get install -y dos2unix",
+#       "dos2unix /home/${var.username_app}/.ssh/id_terraform"
+#     ]
 
-    connection {
-      type        = "ssh"
-      host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
-      user        = var.username_app
-      # private_key = file(local_file.private_key.filename)
-      private_key = file("./ssh/id_terraform")
-    }
-  }
+#     connection {
+#       type        = "ssh"
+#       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
+#       user        = var.username_app
+#       # private_key = file(local_file.private_key.filename)
+#       private_key = file("./ssh/id_terraform")
+#     }
+#   }
 
-  depends_on = [null_resource.upload_ssh_key]
-}
+#   depends_on = [null_resource.upload_ssh_key]
+# }
 
 # Generate inventory (unchanged)
 resource "null_resource" "generate_inventory" {
@@ -215,7 +215,9 @@ resource "null_resource" "generate_inventory" {
     }
   }
 
-  depends_on = [null_resource.upload_ansible, null_resource.format_ssh_key]
+  # depends_on = [null_resource.upload_ansible, null_resource.format_ssh_key]
+  
+  depends_on = [null_resource.upload_ansible]
 }
 
 # Run Ansible playbook
