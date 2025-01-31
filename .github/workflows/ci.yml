@@ -3,7 +3,7 @@ name: Laravel CI
 on:
   # Déclenche la CI pour tous les push sur n'importe quelle branche
   push:
-    branches: ['*']
+    branches: ['iaas']
 
 jobs:
   build-and-test:
