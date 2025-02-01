@@ -10,21 +10,6 @@ data "azurerm_dev_test_lab" "tclo" {
 }
 
 
-# # Generate SSH keys with Terraform
-# resource "tls_private_key" "ssh_key" {
-#   algorithm = var.algorithm_type
-# }
-# resource "local_file" "private_key" {
-#   content  = tls_private_key.ssh_key.private_key_openssh
-#   filename = "./ssh/id_ed25519"
-#   file_permission = "0600" 
-# }
-
-# locals {
-#   public_key_openssh = tls_private_key.ssh_key.public_key_openssh
-# }
-
-
 # Create VM
 resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
   # count                  = var.instance_count
@@ -101,9 +86,9 @@ resource "null_resource" "setup_ansible" {
       "pip3 install --upgrade pip",
       "pip3 install --user ansible",
      
-      # "python3 --version",
-      # "pip3 --version",
-      # "~/.local/bin/ansible --version"
+      "python3 --version",
+      "pip3 --version",
+      "~/.local/bin/ansible --version"
     ]
 
     connection {
@@ -137,133 +122,147 @@ resource "null_resource" "upload_ansible" {
   depends_on = [null_resource.setup_ansible]
 }
 
-# Upload SSH key (private)
-resource "null_resource" "upload_ssh_keys" {
-  provisioner "file" {
-    source      = "./ssh/id_terraform"
-    # source = local_file.private_key.filename
-    destination = "/home/${var.username_app}/.ssh/id_terraform"
+# # Upload SSH key (private)
+# resource "null_resource" "upload_ssh_keys" {
+#   provisioner "file" {
+#     source      = "./ssh/id_terraform"
+#     # source = local_file.private_key.filename
+#     destination = "/home/${var.username_app}/.ssh/id_terraform"
 
-    connection {
-      type        = "ssh"
-      host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
-      user        = var.username_app
-      private_key = file("./ssh/id_terraform")
-      # private_key = file(local_file.private_key.filename)
-    }
-  }
+#     connection {
+#       type        = "ssh"
+#       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
+#       user        = var.username_app
+#       private_key = file("./ssh/id_terraform")
+#       # private_key = file(local_file.private_key.filename)
+#     }
+#   }
 
-  provisioner "file" {
-    source      = "./ssh/id_terraform.pub"
-    # source = local_file.private_key.filename
-    destination = "/home/${var.username_app}/.ssh/id_terraform.pub"
+#   provisioner "file" {
+#     source      = "./ssh/id_terraform.pub"
+#     # source = local_file.private_key.filename
+#     destination = "/home/${var.username_app}/.ssh/id_terraform.pub"
 
-    connection {
-      type        = "ssh"
-      host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
-      user        = var.username_app
-      private_key = file("./ssh/id_terraform")
-      # private_key = file(local_file.private_key.filename)
-    }
-  }
+#     connection {
+#       type        = "ssh"
+#       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
+#       user        = var.username_app
+#       private_key = file("./ssh/id_terraform")
+#       # private_key = file(local_file.private_key.filename)
+#     }
+#   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "chmod 700 /home/${var.username_app}/.ssh",
-      "chmod 600 /home/${var.username_app}/.ssh/id_terraform",
-      "chmod 644 /home/${var.username_app}/.ssh/id_terraform.pub",
-      "touch /home/${var.username_app}/.ssh/authorized_keys",
-      "chmod 600 /home/${var.username_app}/.ssh/authorized_keys",
-      "cat /home/${var.username_app}/.ssh/id_terraform.pub >> /home/${var.username_app}/.ssh/authorized_keys",
-      # "touch /home/${var.username_app}/.ssh/config",
-      # "echo 'Host *' > /home/${var.username_app}/.ssh/config",
-      # "echo '    StrictHostKeyChecking no' >> /home/${var.username_app}/.ssh/config"
-      "echo 'HEEELLO \n \n '"
-    ]
+#   provisioner "remote-exec" {
+#     inline = [
+#       "chmod 700 /home/${var.username_app}/.ssh",
+#       "chmod 600 /home/${var.username_app}/.ssh/id_terraform",
+#       "chmod 644 /home/${var.username_app}/.ssh/id_terraform.pub",
+#       "touch /home/${var.username_app}/.ssh/authorized_keys",
+#       "chmod 600 /home/${var.username_app}/.ssh/authorized_keys",
+#       "cat /home/${var.username_app}/.ssh/id_terraform.pub >> /home/${var.username_app}/.ssh/authorized_keys",
+#       # "touch /home/${var.username_app}/.ssh/config",
+#       # "echo 'Host *' > /home/${var.username_app}/.ssh/config",
+#       # "echo '    StrictHostKeyChecking no' >> /home/${var.username_app}/.ssh/config"
+#       "echo 'HEEELLO \n \n '"
+#     ]
 
-    connection {
-      type        = "ssh"
-      host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
-      user        = var.username_app
-      # private_key = file(local_file.private_key.filename)
-      private_key = file("./ssh/id_terraform")
-    }
-  }
+#     connection {
+#       type        = "ssh"
+#       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
+#       user        = var.username_app
+#       # private_key = file(local_file.private_key.filename)
+#       private_key = file("./ssh/id_terraform")
+#     }
+#   }
 
-  depends_on = [azurerm_dev_test_linux_virtual_machine.vmapp, null_resource.upload_ansible]
-}
+#   depends_on = [azurerm_dev_test_linux_virtual_machine.vmapp, null_resource.upload_ansible]
+# }
 
-# Convert the key to Unix format using dos2unix
-resource "null_resource" "format_ssh_key" {
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt-get install -y dos2unix",
-      "dos2unix --help",
-      "dos2unix /home/${var.username_app}/.ssh/id_terraform",
-      "dos2unix /home/${var.username_app}/.ssh/id_terraform.pub"
+# # Convert the key to Unix format using dos2unix
+# resource "null_resource" "format_ssh_key" {
+#   provisioner "remote-exec" {
+#     inline = [
+#       "sudo apt-get install -y dos2unix",
+#       "dos2unix --help",
+#       "dos2unix /home/${var.username_app}/.ssh/id_terraform",
+#       "dos2unix /home/${var.username_app}/.ssh/id_terraform.pub"
 
-      # "set -eux",
-      # "mkdir -p ~/.ssh",
+#       # "set -eux",
+#       # "mkdir -p ~/.ssh",
 
-    ]
+#     ]
 
-    connection {
-      type        = "ssh"
-      host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
-      user        = var.username_app
-      # private_key = file(local_file.private_key.filename)
-      private_key = file("./ssh/id_terraform")
-    }
-  }
+#     connection {
+#       type        = "ssh"
+#       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
+#       user        = var.username_app
+#       # private_key = file(local_file.private_key.filename)
+#       private_key = file("./ssh/id_terraform")
+#     }
+#   }
 
-  depends_on = [null_resource.upload_ssh_keys]
-}
+#   depends_on = [null_resource.upload_ssh_keys]
+# }
 
-# Generate inventory (unchanged)
-resource "null_resource" "generate_inventory" {
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir -p /home/${var.username_app}/ansible/inventories",
-      "cd /home/${var.username_app}/ansible/inventories",
-      "echo 'all:' > hosts.yml",
-      "echo '  hosts:' >> hosts.yml",
-      "echo '    azure_vm_one:' >> hosts.yml",
-      "echo '      ansible_host: ${azurerm_dev_test_linux_virtual_machine.vmapp.fqdn}' >> hosts.yml",
-      "echo '      ansible_user: ${var.username_app}' >> hosts.yml",
-      "echo '      ansible_ssh_private_key_file: /home/${var.username_app}/.ssh/id_terraform' >> hosts.yml",
-      "echo '      ansible_ssh_common_args: \"-o StrictHostKeyChecking=no\"' >> hosts.yml"
-    ]
+# # Generate inventory (unchanged)
+# resource "null_resource" "generate_inventory" {
+#   provisioner "remote-exec" {
+#     inline = [
+#       "mkdir -p /home/${var.username_app}/ansible/inventories",
+#       "cd /home/${var.username_app}/ansible/inventories",
+#       "echo 'all:' > hosts.yml",
+#       "echo '  hosts:' >> hosts.yml",
+#       "echo '    azure_vm_one:' >> hosts.yml",
+#       "echo '      ansible_host: ${azurerm_dev_test_linux_virtual_machine.vmapp.fqdn}' >> hosts.yml",
+#       "echo '      ansible_user: ${var.username_app}' >> hosts.yml",
+#       "echo '      ansible_ssh_private_key_file: /home/${var.username_app}/.ssh/id_terraform' >> hosts.yml",
+#       "echo '      ansible_ssh_common_args: \"-o StrictHostKeyChecking=no\"' >> hosts.yml"
+#     ]
 
-    connection {
-      type        = "ssh"
-      host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
-      user        = var.username_app
-      # private_key = file(local_file.private_key.filename)
-      private_key = file("./ssh/id_terraform")
-    }
-  }
+#     connection {
+#       type        = "ssh"
+#       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
+#       user        = var.username_app
+#       # private_key = file(local_file.private_key.filename)
+#       private_key = file("./ssh/id_terraform")
+#     }
+#   }
 
-  depends_on = [null_resource.upload_ansible, null_resource.format_ssh_key]
+#   depends_on = [null_resource.upload_ansible, null_resource.format_ssh_key]
   
-  # depends_on = [null_resource.upload_ansible]
-}
+#   # depends_on = [null_resource.upload_ansible]
+# }
 
-# Run Ansible playbook
-resource "null_resource" "run_playbook" {
-  provisioner "remote-exec" {
-    inline = [
-      "ssh-keyscan -H ${azurerm_dev_test_linux_virtual_machine.vmapp.fqdn} >> ~/.ssh/known_hosts",
-      "~/.local/bin/ansible-playbook -i /home/${var.username_app}/ansible/inventories/hosts.yml /home/${var.username_app}/ansible/playbook.yml --extra-vars '${local.docker_env_vars_json}' -vv"
-    ]
+# # Run Ansible playbook
+# resource "null_resource" "run_playbook" {
+#   provisioner "remote-exec" {
+#     inline = [
+#       "ssh-keyscan -H ${azurerm_dev_test_linux_virtual_machine.vmapp.fqdn} >> ~/.ssh/known_hosts",
+#       "~/.local/bin/ansible-playbook -i /home/${var.username_app}/ansible/inventories/hosts.yml /home/${var.username_app}/ansible/playbook.yml --extra-vars '${local.docker_env_vars_json}' -vv"
+#     ]
 
-    connection {
-      type        = "ssh"
-      host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
-      user        = var.username_app
-      # private_key = file(local_file.private_key.filename)
-      private_key = file("./ssh/id_terraform")
-    }
+#     connection {
+#       type        = "ssh"
+#       host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
+#       user        = var.username_app
+#       # private_key = file(local_file.private_key.filename)
+#       private_key = file("./ssh/id_terraform")
+#     }
+#   }
+
+#   depends_on = [null_resource.generate_inventory]
+# }
+
+resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
+  provisioner "local-exec" {
+  command = "~/.local/bin/ansible-playbook -i /home/${USER}/ansible/inventories/hosts.yml /home/${USER}/ansible/playbook.yml --extra-vars '${DOCKER_ARGS}' -vv"
+  interpreter = ["bash", "-c"]
+  }
+  environment = {
+    USER = var.username_app
+    DOCKER_ARGS = local.docker_env_vars_json
   }
 
-  depends_on = [null_resource.generate_inventory]
+
+  depends_on = [null_resource.upload_ansible]
 }
