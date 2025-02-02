@@ -30,3 +30,7 @@ APP_KEY	(laisse vide si tu veux que Laravel la génère lors du déploiement)
  Destroy Previous Infrastructure : terraform destroy -auto-approve
  Plan Deployment : terraform plan -out=tfplan
  Apply Deployment : terraform apply -auto-approve tfplan
+
+
+
+ /home/appuser99/.local/bin/ansible-playbook -i ~/ansible/inventories/hosts.yml, --connection=local /home/appuser99/ansible/playbook.yml --extra-vars '{"docker_env_vars":{"APP_KEY":"","AZ_FQDN":"deplinux-test.westeurope.cloudapp.azure.com","DB_CONNECTION":"mysql","DB_DATABASE":"laravel","DB_HOST":"db","DB_PASSWORD":"secret","DB_PORT":"3306","DB_ROOT_PASSWORD":"admin","DB_USERNAME":"laravel"}}' -v

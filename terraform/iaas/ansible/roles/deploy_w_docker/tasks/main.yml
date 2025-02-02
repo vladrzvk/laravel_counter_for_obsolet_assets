@@ -28,7 +28,7 @@
   git:
     repo: https://github.com/vladrzvk/laravel_counter_for_obsolet_assets.git
     dest: /var/www/vm-laravel-folder
-    version: iaas
+    version: iaasV2
     force: yes
   become: true
 

@@ -1,9 +1,12 @@
----
 # tasks file for install_docker
 - name: Update and upgrade apt packages
   apt:
     update_cache: yes
     upgrade: yes
+
+# - name: Debug host variables
+#   debug:
+#     var: hostvars[inventory_hostname]
 
 - name: Install required packages
   apt:
@@ -17,9 +20,19 @@
       - docker-compose
     state: present
 
+# - name: Debug current user
+#   debug:
+#     msg: "Current user is {{ lookup('env', 'USER') }} (from environment)."
+
+
+# - name: Debug current user as become
+#   debug:
+#     msg: "Current user {{ lookup('env', 'USER') }} (from environment)."
+#   become: true
+
 - name: Add current user to Docker group
-  command: usermod -aG docker "{{ ansible_user }}"
-  become: true  
+  command: usermod -aG docker "{{ lookup('env', 'USER') }}"
+  become: true
 
 - name: Start Docker service
   service:

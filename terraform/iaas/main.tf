@@ -88,7 +88,8 @@ resource "null_resource" "setup_ansible" {
      
       "python3 --version",
       "pip3 --version",
-      "~/.local/bin/ansible --version"
+      # "~/.local/bin/ansible --version"
+      "ansible --version"
     ]
 
     connection {
@@ -119,7 +120,29 @@ resource "null_resource" "upload_ansible" {
     }
   }
 
-  depends_on = [null_resource.setup_ansible]
+  provisioner "local-exec" {
+    command = <<-EOT
+      /home/${var.username_app}/.local/bin/ansible-playbook \
+      -i localhost, --connection=local \
+      /home/${var.username_app}/ansible/playbook.yml \
+      --extra-vars '${local.docker_env_vars_json}' -vv
+    EOT
+
+
+    #  /home/appuser99/.local/bin/ansible-playbook -i ~/ansible/inventories/hosts.yml, --connection=local /home/appuser99/ansible/playbook.yml --extra-vars '{"docker_env_vars":{"APP_KEY":"","AZ_FQDN":"deplinux-test.westeurope.cloudapp.azure.com","DB_CONNECTION":"mysql","DB_DATABASE":"laravel","DB_HOST":"db","DB_PASSWORD":"secret","DB_PORT":"3306","DB_ROOT_PASSWORD":"admin","DB_USERNAME":"laravel"}}' -v
+
+    interpreter = ["/bin/bash", "-c"]
+
+    # environment = {
+    #   USER_APP       = var.username_app
+    #   DOCKER_APP_ARGS = local.docker_env_vars_json
+    # }
+
+    working_dir = "/home/${var.username_app}/ansible"
+
+  }
+
+ 
 }
 
 # # Upload SSH key (private)
@@ -253,16 +276,22 @@ resource "null_resource" "upload_ansible" {
 #   depends_on = [null_resource.generate_inventory]
 # }
 
-resource "azurerm_dev_test_linux_virtual_machine" "vmapp" {
-  provisioner "local-exec" {
-  command = "~/.local/bin/ansible-playbook -i /home/${USER}/ansible/inventories/hosts.yml /home/${USER}/ansible/playbook.yml --extra-vars '${DOCKER_ARGS}' -vv"
-  interpreter = ["bash", "-c"]
-  }
-  environment = {
-    USER = var.username_app
-    DOCKER_ARGS = local.docker_env_vars_json
-  }
+# resource "null_resource" "my_local_exec_test_args" {
+#   provisioner "local-exec" {
+#   command = "echo $USER   - \n -\n - \n - \n -    $DOCKER_ARGS"
+  
+#   environment = {
+#     USER = var.username_app
+#     DOCKER_ARGS = local.docker_env_vars_json
+#   }
+#   }
+#   depends_on = [null_resource.upload_ansible]
+# }
 
 
-  depends_on = [null_resource.upload_ansible]
-}
+
+
+
+
+
+

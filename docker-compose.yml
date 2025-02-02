@@ -29,7 +29,7 @@ services:
     # adapt with default dir bitnami 
       - ./demo:/app
     working_dir: /app
-    env_file: ./demo/.env  
+    env_file: ./demo/.env
     environment:
       - APP_NAME=Laravel
       - APP_ENV=local
@@ -51,7 +51,6 @@ services:
       - SESSION_LIFETIME=120
     command: >
       bash -c "composer install &&
-              php artisan cache:clear --force &&
               php artisan key:generate --force &&
               php artisan migrate --force || true &&
               php artisan serve --host=0.0.0.0 --port=8081"
