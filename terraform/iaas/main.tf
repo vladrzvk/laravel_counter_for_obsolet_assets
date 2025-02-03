@@ -88,8 +88,8 @@ resource "null_resource" "setup_ansible" {
      
       "python3 --version",
       "pip3 --version",
-      # "~/.local/bin/ansible --version"
-      "ansible --version"
+      "~/.local/bin/ansible --version"
+      # "ansible --version"
     ]
 
     connection {
@@ -118,32 +118,11 @@ resource "null_resource" "upload_ansible" {
       private_key = file("./ssh/id_terraform")
       # private_key = file(local_file.private_key.filename)
     }
-  }
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      /home/${var.username_app}/.local/bin/ansible-playbook \
-      -i localhost, --connection=local \
-      /home/${var.username_app}/ansible/playbook.yml \
-      --extra-vars '${local.docker_env_vars_json}' -vv
-    EOT
-
-
-    #  /home/appuser99/.local/bin/ansible-playbook -i ~/ansible/inventories/hosts.yml, --connection=local /home/appuser99/ansible/playbook.yml --extra-vars '{"docker_env_vars":{"APP_KEY":"","AZ_FQDN":"deplinux-test.westeurope.cloudapp.azure.com","DB_CONNECTION":"mysql","DB_DATABASE":"laravel","DB_HOST":"db","DB_PASSWORD":"secret","DB_PORT":"3306","DB_ROOT_PASSWORD":"admin","DB_USERNAME":"laravel"}}' -v
-
-    interpreter = ["/bin/bash", "-c"]
-
-    # environment = {
-    #   USER_APP       = var.username_app
-    #   DOCKER_APP_ARGS = local.docker_env_vars_json
-    # }
-
-    working_dir = "/home/${var.username_app}/ansible"
-
-  }
-
- 
+  } 
+  depends_on = [null_resource.setup_ansible]
 }
+
+
 
 # # Upload SSH key (private)
 # resource "null_resource" "upload_ssh_keys" {
@@ -290,8 +269,24 @@ resource "null_resource" "upload_ansible" {
 
 
 
+resource "null_resource" "lunch_playbook" {
+  provisioner "remote-exec" {
+    inline = [
+    <<-EOT
+      /home/${var.username_app}/.local/bin/ansible-playbook -i localhost, --connection=local /home/${var.username_app}/ansible/playbook.yml --extra-vars '${local.docker_env_vars_json}' -vv
+       EOT
+    ]
+
+    connection {
+      type        = "ssh"
+      host        = azurerm_dev_test_linux_virtual_machine.vmapp.fqdn
+      user        = var.username_app
+      private_key = file("./ssh/id_terraform")
+      # private_key = file(local_file.private_key.filename)
+    }
 
 
-
-
-
+    #  /home/appuser99/.local/bin/ansible-playbook -i ~/ansible/inventories/hosts.yml, --connection=local /home/appuser99/ansible/playbook.yml --extra-vars '{"docker_env_vars":{"APP_KEY":"","AZ_FQDN":"deplinux-test.westeurope.cloudapp.azure.com","DB_CONNECTION":"mysql","DB_DATABASE":"laravel","DB_HOST":"db","DB_PASSWORD":"secret","DB_PORT":"3306","DB_ROOT_PASSWORD":"admin","DB_USERNAME":"laravel"}}' -v
+    }
+    depends_on = [null_resource.upload_ansible]
+}

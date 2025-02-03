@@ -34,6 +34,7 @@ services:
       - APP_NAME=Laravel
       - APP_ENV=local
       - APP_DEBUG=true
+      - APP_KEY=${APP_KEY}
       # - APP_URL=http://laravel.localhost
       - DB_CONNECTION=${DB_CONNECTION}
       - DB_HOST=${DB_HOST}

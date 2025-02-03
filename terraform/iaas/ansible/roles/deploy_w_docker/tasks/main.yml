@@ -161,14 +161,29 @@
   register: keygen_output
   become: true
 
-- name: Copier le fichier .env du conteneur vers l'hôte
+- name: Copier le fichier .env du conteneur vers demo/.env
   command: docker cp vm-laravel-folder_app_1:/app/.env /var/www/vm-laravel-folder/demo/.env
   become: true
 
-- name: Vérifier le fichier .env mis à jour
-  command: cat /var/www/vm-laravel-folder/demo/.env
-  register: env_content
+- name: Dupliquer le .env vers /var/www/vm-laravel-folder/.env
+  command: cp /var/www/vm-laravel-folder/demo/.env /var/www/vm-laravel-folder/.env
   become: true
+
+- name: Vérifier /var/www/vm-laravel-folder/demo/.env
+  command: cat /var/www/vm-laravel-folder/demo/.env
+  register: env_demo_content
+  become: true
+
+- name: Vérifier /var/www/vm-laravel-folder/.env
+  command: cat /var/www/vm-laravel-folder/.env
+  register: env_main_content
+  become: true
+
+- name: Debug .env
+  debug:
+    msg: 
+      - "demo/.env => {{ env_demo_content.stdout }}"
+      - "main .env => {{ env_main_content.stdout }}"
 
 - name: Afficher la clé Laravel générée
   debug:
