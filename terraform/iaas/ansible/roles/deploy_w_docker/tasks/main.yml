@@ -72,7 +72,7 @@
   debug:
     var: docker_env_vars
 
-- name: Créer le fichier .env pour laravel
+- name: Créer le fichier .env pour laravel (dans /demo)
   copy:
     content: |
       {% for key, value in docker_env_vars.items() %}
@@ -83,7 +83,7 @@
     group: www-data
     mode: '0644'
 
-- name: Créer le fichier .env pour Docker
+- name: Créer le fichier .env pour Docker (dans /var/www/vm-laravel-folder/.env)
   copy:
     content: |
       {% for key, value in docker_env_vars.items() %}
@@ -94,13 +94,14 @@
     group: www-data
     mode: '0644'
 
+# Démarre les conteneurs
 - name: Run Docker Compose for vm-laravel-folder
   command: docker-compose up -d
   args:
     chdir: /var/www/vm-laravel-folder
 
-
-- name: Attendre que MySQL dans le conteneur soit prêt 
+# Attendre que MySQL dans le conteneur soit prêt
+- name: Attendre que MySQL dans le conteneur soit prêt
   command: >
     docker exec vm-laravel-folder_db_1
     mysql -h 127.0.0.1
@@ -109,7 +110,7 @@
           -e "SELECT 1;"
   register: mysql_check
   changed_when: false
-  failed_when: false        
+  failed_when: false
   retries: 10
   delay: 20
   until: mysql_check.rc == 0
@@ -117,30 +118,26 @@
 
 # Vérifier l'état des migrations Laravel
 - name: Vérifier si des migrations sont déjà appliquées
-  # EN: Run 'php artisan migrate:status' to see if the DB is up-to-date or not
   command: docker exec vm-laravel-folder_app_1 php artisan migrate:status
   register: migrations_status
-  changed_when: false       # EN: We don't consider this as "changed" for Ansible
-  failed_when: false        # EN: Even if it returns a non-zero code, we won't fail immediately
+  changed_when: false
+  failed_when: false
   become: true
 
-# Créer une migration init si aucune migration n'est détectée
+# Créer une migration init si aucune migration n'existe
 - name: Créer une migration si aucune n'existe
-  # EN: If rc != 0, it probably means there are no migrations table or something is missing.
-  #     We create a basic init_migration as in your original logic.
   command: docker exec vm-laravel-folder_app_1 php artisan make:migration init_migration
   when: migrations_status.rc != 0
   become: true
 
-# Exécuter les migrations uniquement si elles ne sont pas encore à jour
+# Exécuter les migrations uniquement si elles ne sont pas à jour
 - name: Exécuter les migrations Laravel
-  # EN: If rc == 0, that means everything is up-to-date. If != 0, we run 'migrate --force'.
   command: docker exec vm-laravel-folder_app_1 php artisan migrate --force
   register: migration_output
   when: migrations_status.rc != 0
   become: true
 
-# Afficher le résultat des migrations uniquement si elles ont été exécutées
+# Afficher le résultat des migrations
 - name: Afficher le résultat des migrations
   debug:
     var: migration_output.stdout
@@ -148,11 +145,10 @@
 
 # Exécuter le seeding de la base de données
 - name: Remplir la base de données avec des données de seeders
-  # EN: We only seed if we actually had to run migrations.
   command: docker exec vm-laravel-folder_app_1 php artisan db:seed --force
   register: seed_output
   when: migrations_status.rc != 0
-  become: true  
+  become: true
 
 # Afficher le résultat du seeding
 - name: Afficher le résultat du seeding
@@ -160,24 +156,24 @@
     var: seed_output.stdout
   when: migrations_status.rc != 0
 
-# Générer la clé Laravel à l'intérieur du conteneur
 - name: Générer la clé d'application Laravel
   command: docker exec -w /app vm-laravel-folder_app_1 php artisan key:generate
   register: keygen_output
   become: true
 
-# Copier le fichier .env mis à jour vers la machine hôte
 - name: Copier le fichier .env du conteneur vers l'hôte
   command: docker cp vm-laravel-folder_app_1:/app/.env /var/www/vm-laravel-folder/demo/.env
   become: true
 
-# Vérifier le fichier .env après mise à jour
 - name: Vérifier le fichier .env mis à jour
   command: cat /var/www/vm-laravel-folder/demo/.env
   register: env_content
   become: true
 
-# Afficher la clé Laravel générée
 - name: Afficher la clé Laravel générée
   debug:
     var: env_content.stdout_lines
+
+- name: Redémarrer le conteneur Laravel pour prendre en compte la nouvelle clé
+  command: docker restart vm-laravel-folder_app_1
+  become: true
