@@ -159,3 +159,25 @@
   debug:
     var: seed_output.stdout
   when: migrations_status.rc != 0
+
+# Générer la clé Laravel à l'intérieur du conteneur
+- name: Générer la clé d'application Laravel
+  command: docker exec -w /app vm-laravel-folder_app_1 php artisan key:generate
+  register: keygen_output
+  become: true
+
+# Copier le fichier .env mis à jour vers la machine hôte
+- name: Copier le fichier .env du conteneur vers l'hôte
+  command: docker cp vm-laravel-folder_app_1:/app/.env /var/www/vm-laravel-folder/demo/.env
+  become: true
+
+# Vérifier le fichier .env après mise à jour
+- name: Vérifier le fichier .env mis à jour
+  command: cat /var/www/vm-laravel-folder/demo/.env
+  register: env_content
+  become: true
+
+# Afficher la clé Laravel générée
+- name: Afficher la clé Laravel générée
+  debug:
+    var: env_content.stdout_lines
