@@ -156,39 +156,39 @@
     var: seed_output.stdout
   when: migrations_status.rc != 0
 
-- name: Générer la clé d'application Laravel
-  command: docker exec -w /app vm-laravel-folder_app_1 php artisan key:generate
-  register: keygen_output
-  become: true
+# - name: Générer la clé d'application Laravel
+#   command: docker exec -w /app vm-laravel-folder_app_1 php artisan key:generate
+#   register: keygen_output
+#   become: true
 
-- name: Copier le fichier .env du conteneur vers demo/.env
-  command: docker cp vm-laravel-folder_app_1:/app/.env /var/www/vm-laravel-folder/demo/.env
-  become: true
+# - name: Copier le fichier .env du conteneur vers demo/.env
+#   command: docker cp vm-laravel-folder_app_1:/app/.env /var/www/vm-laravel-folder/demo/.env
+#   become: true
 
-- name: Dupliquer le .env vers /var/www/vm-laravel-folder/.env
-  command: cp /var/www/vm-laravel-folder/demo/.env /var/www/vm-laravel-folder/.env
-  become: true
+# - name: Dupliquer le .env vers /var/www/vm-laravel-folder/.env
+#   command: cp /var/www/vm-laravel-folder/demo/.env /var/www/vm-laravel-folder/.env
+#   become: true
 
-- name: Vérifier /var/www/vm-laravel-folder/demo/.env
-  command: cat /var/www/vm-laravel-folder/demo/.env
-  register: env_demo_content
-  become: true
+# - name: Vérifier /var/www/vm-laravel-folder/demo/.env
+#   command: cat /var/www/vm-laravel-folder/demo/.env
+#   register: env_demo_content
+#   become: true
 
-- name: Vérifier /var/www/vm-laravel-folder/.env
-  command: cat /var/www/vm-laravel-folder/.env
-  register: env_main_content
-  become: true
+# - name: Vérifier /var/www/vm-laravel-folder/.env
+#   command: cat /var/www/vm-laravel-folder/.env
+#   register: env_main_content
+#   become: true
 
-- name: Debug .env
-  debug:
-    msg: 
-      - "demo/.env => {{ env_demo_content.stdout }}"
-      - "main .env => {{ env_main_content.stdout }}"
+# - name: Debug .env
+#   debug:
+#     msg: 
+#       - "demo/.env => {{ env_demo_content.stdout }}"
+#       - "main .env => {{ env_main_content.stdout }}"
 
-- name: Afficher la clé Laravel générée
-  debug:
-    var: env_content.stdout_lines
+# - name: Afficher la clé Laravel générée
+#   debug:
+#     var: env_content.stdout_lines
 
-- name: Redémarrer le conteneur Laravel pour prendre en compte la nouvelle clé
-  command: docker restart vm-laravel-folder_app_1
-  become: true
+# - name: Redémarrer le conteneur Laravel pour prendre en compte la nouvelle clé
+#   command: docker restart vm-laravel-folder_app_1
+#   become: true
