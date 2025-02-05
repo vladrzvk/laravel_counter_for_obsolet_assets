@@ -140,7 +140,7 @@ resource "null_resource" "lunch_playbook" {
     }
 
 
-    #  /home/appuser99/.local/bin/ansible-playbook -i ~/ansible/inventories/hosts.yml, --connection=local /home/appuser99/ansible/playbook.yml --extra-vars '{"docker_env_vars":{"APP_KEY":"","AZ_FQDN":"deplinux-test.westeurope.cloudapp.azure.com","DB_CONNECTION":"mysql","DB_DATABASE":"laravel","DB_HOST":"db","DB_PASSWORD":"secret","DB_PORT":"3306","DB_ROOT_PASSWORD":"admin","DB_USERNAME":"laravel"}}' -v
+    #  /home/appuser99/.local/bin/ansible-playbook -i ~/ansible/inventories/hosts.yml, --connection=local /home/appuser99/ansible/playbook.yml --extra-vars '{"docker_env_vars":{"APP_KEY":"base64:sm7Wno4Yvvx128EYZyYByosxlq27qUbUNc+VFkghGkY=","AZ_FQDN":"deplinux-test.westeurope.cloudapp.azure.com","DB_CONNECTION":"mysql","DB_DATABASE":"laravel","DB_HOST":"db","DB_PASSWORD":"secret","DB_PORT":"3306","DB_ROOT_PASSWORD":"admin","DB_USERNAME":"laravel"}}' -v
     }
     depends_on = [null_resource.upload_ansible]
 }
